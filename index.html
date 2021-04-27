@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="jp">
+<head>
+  <meta charset="utf-8"/>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+    integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+    crossorigin="anonymous"></script>
+  <script type="text/javascript" src="dist/main.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+
+<body class="body">
+  <div id="menu">
+    <nav class="navbar navbar-dark bg-dark navbar-expand-lg">
+      <a class="navbar-brand" href="/index.html">Joy-Con with WebHID</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="/pages/operation.html">Operation Tester</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+  <div class="container-xl shadow-sm bg-white p-3">
+    <h1>トップページ</h1>
+    <h2>概要</h2>
+    <p>WebHIDを用いて、Joy-Conの諸々の操作をテストするために作成した。なお、Joy-Conとの通信に関するほとんどの情報は<cite>Nintendo_Switch_Reverse_Engineering</cite>を参照した。</p>
+
+    <h2>Joy-Con Operation Tester</h2>
+    <h3>機能</h3>
+    <h4>Home</h4>
+    <ul>
+      <li>Device Informationの取得(Output Subcommand ID: 0x02)</li>
+      <li>Simple HID mode(Input Subcommand ID: 0x3f)もしくはStandard full mode(Input Subcommand ID: 0x30)の解析</li>
+      <ul>
+        <li>入力ボタンの表示</li>
+        <li>加速度センサーとジャイロスコープのデータの取得</li>
+      </ul>
+    </ul>
+    <h4>NFC/IR</h4>
+    <p>NFC ICとIRカメラを制御しているMCUとの通信を行う。</p>
+    <ul>
+      <li>MCUの状態を取得</li>
+      <li>NFC TagのPollingとUID/IDmの取得</li>
+    </ul>
+
+    <h3>使い方</h3>
+    <ol>
+      <li>PCとJoy-ConとをBluetoothによりペアリングを行う。</li>
+      <li><a href="/pages/operation.html">Joy-Con Operation Tester</a>に移動し、Connectボタンをクリックする。</li>
+      <li>HIDデバイスとの接続を要求されるので、Joy-Conを選択する。</li>
+      <li>以上。</li>
+    </ol>
+
+    <h3>実装予定</h3>
+    <p>以下の事柄は基本的にlocalでのテストが成功している、もしくは実装のための十分な情報が既に集まっているものになる。</p>
+    <ul>
+      <li>Joy-ConのサイドについているPlayer lightsの点灯、点滅および消灯の操作</li>
+      <li>HD振動(バイブレーター)のHigh/Low bandの周波数もしくは振幅の操作</li>
+      <li>Joy-Con内にあるフラッシュメモリのデータの取得(書き込みを行う予定はない)</li>
+      <li>IRカメラの操作(ブラウザ上でできるの?)</li>
+    </ul>
+
+    <h3>不明な事柄</h3>
+    <h4>NFC ICによるNFC Tagとのpolling以外の通信</h4>
+    <p>Amiboで採用されているNTag(ISO/IEC 14443 Type A, NFC-A)や、Mifare Classic(ISO/IEC 14443 Type A, NFC-A)と思しきものとのreadなどの通信データはあり、それらとのCommandは紹介されている。しかし、手元にあるNFC TagはPASMO(Felica, NFC-F)とマイナンバーカード(ISO/IEC 14443 Type B, NFC-B)であり、それらとのCommandは紹介されていない。マイナンバーカードは送信データを間違うと場合によってはロックがかかる可能性があり、実験には不向きである。なので、Felicaとの通信を試みたが成功していない。Joy-Conを使ってFelicaと通信できた人がいたら教えて......</p>
+
+    <h3>Q&A</h3>
+    <dl>
+      <dt>Q. 動作確認を行った環境は?</dt>
+      <dd>Windows 10</dd>
+      <dd>Google Chrome 90.0.4430.85</dd>
+      <dd>Joy-Con L/R</dd>
+      <dt>Q. Pro Controllerは使えるの?</dt>
+      <dd>Pro Controllerを所持していないので、動くかは不明。一部は動くと思う。多分。きっと。</dd>
+      <dt>Q. Connectボタンを押してもwindowが出てこないんだけど?</dt>
+      <dd>Chromeを使用しているのであれば、バージョンアップすれば動くかも。その他のブラウザでは動作確認を行っていないが、ChromeとFirefox以外のブラウザではWebHIDに対応してなく、動作しない可能性あり。</dd>
+    </dl>
+
+    <h2>Reference</h2>
+    <ol>
+      <li><a href="https://github.com/dekuNukem/Nintendo_Switch_Reverse_Engineering/blob/master/bluetooth_hid_notes.md">Bluetooth HID Information - Nintendo_Switch_Reverse_Engineering</a>, dekuNukem</li>
+      <li><a href="https://github.com/dekuNukem/Nintendo_Switch_Reverse_Engineering/blob/master/bluetooth_hid_subcommands_notes.md">Subcommands - Nintendo_Switch_Reverse_Engineering</a>, dekuNukem</li>
+      <li><a href="https://github.com/dekuNukem/Nintendo_Switch_Reverse_Engineering/blob/master/imu_sensor_notes.md">6-Axis sensor information - Nintendo_Switch_Reverse_Engineering</a>, dekuNukem</li>
+      <li><a href="https://github.com/dekuNukem/Nintendo_Switch_Reverse_Engineering/issues/49">NFC #49 - Nintendo_Switch_Reverse_Engineering</a>, dekuNukem</li>
+      <li><a href="https://github.com/CTCaer/Nintendo_Switch_Reverse_Engineering/blob/ir-nfc/mcu_ir_nfc_notes.md">IR/NFC MCU - Nintendo_Switch_Reverse_Engineering</a>, CTCaer</li>
+    </ol>
+  </div>
+  <!--
+  <div id="main" class="container">
+    <h1>Joy-Con Operation Tester</h1>
+    <div>
+      <button type="button" class="btn btn-primary" id="ConnectButton">Connect to Joy-Con</button>
+    </div>
+
+    <table class="table table-bordered">
+      <thead class="thead-dark">
+        <tr class="top-column">
+          <th></th>
+          <th>Joy-Con L</th>
+          <th>Joy-Con R</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row" class="top-row">Button Stata</th>
+          <td><canvas id="JoyConLCanvas"></canvas></td>
+          <td><canvas id="JoyConRCanvas"></canvas></td>
+        </tr>
+        <tr>
+          <th scope="row" class="top-row">Player Light</th>
+          <td>
+            <table class="table table-borderless">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>1</th>
+                  <th>2</th>
+                  <th>3</th>
+                  <th>4</th>
+                </tr>
+              </thead>
+              <tr>
+                <th>Keep on</th>
+                <td><input type="checkbox" name="JoyConLLight" value="0"></td>
+                <td><input type="checkbox" name="JoyConLLight" value="1"></td>
+                <td><input type="checkbox" name="JoyConLLight" value="2"></td>
+                <td><input type="checkbox" name="JoyConLLight" value="3"></td>
+              </tr>
+              <tr>
+                <th>Flash</th>
+                <td><input type="checkbox" name="JoyConLLight" value="4"></td>
+                <td><input type="checkbox" name="JoyConLLight" value="5"></td>
+                <td><input type="checkbox" name="JoyConLLight" value="6"></td>
+                <td><input type="checkbox" name="JoyConLLight" value="7"></td>
+                <td><button type="button" class="btn btn-dark btn-sm" id="JoyConLLightButton">Set</button></td>
+              </tr>
+            </table>
+          </td>
+          <td>
+            <table class="table table-borderless">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>1</th>
+                  <th>2</th>
+                  <th>3</th>
+                  <th>4</th>
+                </tr>
+              </thead>
+              <tr>
+                <th>Keep on</th>
+                <td><input type="checkbox" name="JoyConRLight" value="0" id="k1"></td>
+                <td><input type="checkbox" name="JoyConRLight" value="1" id="k2"></td>
+                <td><input type="checkbox" name="JoyConRLight" value="2" id="k3"></td>
+                <td><input type="checkbox" name="JoyConRLight" value="3" id="k4"></td>
+              </tr>
+              <tr>
+                <th>Flash</th>
+                <td><input type="checkbox" name="JoyConRLight" value="4" id="f1"></td>
+                <td><input type="checkbox" name="JoyConRLight" value="5" id="f2"></td>
+                <td><input type="checkbox" name="JoyConRLight" value="6" id="f3"></td>
+                <td><input type="checkbox" name="JoyConRLight" value="7" id="f4"></td>
+                <td><button type="button" class="btn btn-dark btn-sm" id="JoyConRLightButton">Set</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row" class="top-row">Rumble</th>
+          <td>
+            <table class="table table-borderless">
+              <tr>
+                <th>Low Frequency</th>
+                <th><input type="number" id="JoyConLRumbleLowFreq" placeholder="160" min=41 max=626 step=1 value=160>
+                </th>
+              </tr>
+              <tr>
+                <th>Low Amplitude</th>
+                <th><input type="number" id="JoyConLRumbleLowAmpli" min=0 max=1 step=0.001 placeholder="0" value=0></th>
+              </tr>
+              <tr>
+                <th>High Frequency</th>
+                <th><input type="number" id="JoyConLRumbleHighFreq" placeholder="320" min=82 max=1253 step=1 value=320>
+                </th>
+              </tr>
+              <tr>
+                <th>High Amplitude</th>
+                <th><input type="number" id="JoyConLRumbleHighAmpli" min=0 max=1 step=0.001 placeholder="0" value=0>
+                </th>
+                <th><button type="button" class="btn btn-dark btn-sm" id="lRumbleButton">Set</button></th>
+              </tr>
+            </table>
+          </td>
+          <td>
+            <table class="table table-borderless">
+              <tr>
+                <th>Low Frequency</th>
+                <th><input type="number" id="JoyConRRumbleLowFreq" placeholder="160" min=41 max=626 step=1 value=160>
+                </th>
+              </tr>
+              <tr>
+                <th>Low Amplitude</th>
+                <th><input type="number" id="JoyConRRumbleLowAmpli" min=0 max=1 step=0.001 placeholder="0" value=0></th>
+              </tr>
+              <tr>
+                <th>High Frequency</th>
+                <th><input type="number" id="JoyConRRumbleHighFreq" placeholder="320" min=82 max=1253 step=1 value=320>
+                </th>
+              </tr>
+              <tr>
+                <th>High Amplitude</th>
+                <th><input type="number" id="JoyConRRumbleHighAmpli" min=0 max=1 step=0.001 placeholder="0" value=0>
+                </th>
+                <th><button type="button" class="btn btn-dark btn-sm" id="lRumbleButton">Set</button></th>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row" class="top-row">Rumble</th>
+          <td>
+            <form>
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Low Frequency</span>
+                </div>
+                <input type="number" class="form-control" placeholder="0">
+                <div class="input-group-append">
+                  <span class="input-group-text"><input type="checkbox" checked=true></span>
+                </div>
+              </div>
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Low Amplitude</span>
+                </div>
+                <input type="number" class="form-control" placeholder=0>
+                <div class="input-group-append">
+                  <span class="input-group-text"><input type="checkbox" checked=true></span>
+                </div>
+              </div>
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">High Frequency</span>
+                </div>
+                <input type="number" class="form-control" placeholder=0>
+                <div class="input-group-append">
+                  <span class="input-group-text"><input type="checkbox" checked=true></span>
+                </div>
+              </div>
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">High Amplitude</span>
+                </div>
+                <input type="number" class="form-control" placeholder=0>
+                <div class="input-group-append">
+                  <span class="input-group-text"><input type="checkbox" checked=true></span>
+                </div>
+              </div>
+              <button type="button" class="btn btn-dark btn-sm" id="lRumbleButton">Set</button>
+            </form>
+          </td>
+          <td>
+            <form>
+              <div class="form-group row">
+                <label>Low Frequency</label>
+                <div class="col-auto">
+                  <input type="number" class="form-control" placeholder=0>
+                </div>
+              </div>
+              <div class="form-group row">
+                <label>Low Amplitude</label>
+                <div class="col-auto">
+                  <input type="number" class="form-control" placeholder=0>
+                </div>
+              </div>
+            </form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <form>
+    <div class="form-group row">
+      <label>Low Frequency</label>
+      <div class="col-sm-10">
+        <input type="number" class="form-control" placeholder=0>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label>Low Amplitude</label>
+      <div class="col-sm-10">
+        <input type="number" class="form-control" placeholder=0>
+      </div>
+    </div>
+  </form>
+-->
+</body>
+</html>

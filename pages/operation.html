@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="jp">
+<head>
+  <meta charset="utf-8"/>
+  <!--BootStrap-->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+    integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+    crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  
+  <!--GSAP-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.6.1/gsap.min.js" integrity="sha512-cdV6j5t5o24hkSciVrb8Ki6FveC2SgwGfLE31+ZQRHAeSRxYhAQskLkq3dLm8ZcWe1N3vBOEYmmbhzf7NTtFFQ==" crossorigin="anonymous"></script>
+
+  <!---->
+  <script type="text/javascript" src="/dist/operationTester.js"></script>
+  <!---->
+  <link rel="stylesheet" type="text/css" href="/css/style.css">
+</head>
+
+<body class="body">
+  <div id="menu">
+    <nav class="navbar navbar-dark bg-dark navbar-expand-lg">
+      <a class="navbar-brand" href="/index.html">Joy-Con with WebHID</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="/pages/operation.html">Operation Tester</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+  <div class="container-xl bg-white p-3">
+    <h1>Joy-Con Operation Tester</h1>
+
+    <button type="button" class="btn btn-primary my-3" data-toggle="tooltip" data-placement="left" title="Connect to Joy-Con or Pro Controller" id="hid-connect-btn">Connect</button>
+
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home-page" role="tab" aria-controls="home-page" aria-selected="true">Home</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="nfc-ir-tab" data-toggle="tab" href="#nfc-ir-page" role="tab" aria-controls="nfc-ir-page" aria-selected="false">NFC/IR</a>
+      </li>
+      <!--
+      <li class="nav-item">
+        <a class="nav-link" id="spi-tab" data-toggle="tab" href="#spi-page" role="tab" aria-controls="spi-page" aria-selected="false">SPI</a>
+      </li>-->
+      <li class="nav-item">
+        <a class="nav-link" id="setting-tab" data-toggle="tab" href="#setting-page" role="tab" aria-controls="setting-page" aria-selected="false">Setting</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="home-page" role="tabpanel" aria-labelledby="home-tab">
+
+        <div class="shadow my-5 px-4 py-1 rounded-lg" id="device-info">
+          <h2 class="my-3">Device Information</h2>
+          <div class="form-group row">
+            <lable for="firmware-ver" class="col-sm-3 col-form-label">Firmware Version</lable>
+            <div class="col-sm-9">
+              <input class="form-control" type="text" placeholder="" readonly id="firmware-ver">
+            </div>
+          </div>
+          <div class="form-group row">
+            <lable for="controller-type" class="col-sm-3 col-form-label">Controller Type</lable>
+            <div class="col-sm-9">
+              <input class="form-control" type="text" placeholder="" readonly id="controller-type">
+            </div>
+          </div>
+          <div class="form-group row">
+            <lable for="mac-address" class="col-sm-3 col-form-label">MAC Address</lable>
+            <div class="col-sm-9">
+              <input class="form-control" type="text" placeholder="" readonly id="mac-address">
+            </div>
+          </div>
+          <div class="form-group row">
+            <lable for="color" class="col-sm-3 col-form-label">Color?</lable>
+            <div class="col-sm-9">
+              <input class="form-control" type="text" placeholder="" readonly id="color">
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="offset-sm-10 col-2">
+              <button type="button" class="btn btn-primary col-12" id="device-info-btn">Get</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="shadow my-5 px-4 py-3 rounded-lg">
+          <div class="d-flex justify-content-between">
+            <h2>Input report</h2>
+            <div class="btn-group btn-group-toggle my-2" data-toggle="buttons">
+              <label class="btn btn-info active">
+                <input type="radio" name="input-mode" id="input-mode-simple" autocomplete="off" checked> Simple HID mode
+              </label>
+              <label class="btn btn-info">
+                <input type="radio" name="input-mode" id="input-mode-standard" autocomplete="off"> Standard input mode
+              </label>
+            </div>
+          </div>
+          <!--Timer-->
+          <div class="form-group row">
+            <lable for="timer" class="col-sm-3 col-form-label">Timer</lable>
+            <div class="col-sm-9">
+              <input class="form-control" type="text" placeholder="" readonly id="timer">
+            </div>
+          </div>
+          <!--Battery Level-->
+          <div class="form-group row">
+            <lable for="battery-level" class="col-sm-3 col-form-label">Battery Level</lable>
+            <div class="col-sm-9">
+              <input class="form-control" type="text" placeholder="" readonly id="battery-level">
+            </div>
+          </div>
+          <!--Connection Information-->
+          <div class="form-group row">
+            <lable for="connection-info" class="col-sm-3 col-form-label">Connection Information</lable>
+            <div class="col-sm-9">
+              <input class="form-control" type="text" placeholder="" readonly id="connection-info">
+            </div>
+          </div>
+          <!--Buttons State-->
+          <div id="button-status">
+            <div id="button-joycon-r" class="my-3 border px-3 pt-3">
+              <h3>Joy-Con (R)</h3>
+              <div class="row m-3">
+                <div id="r-button-sl" class="border border-dark col-1 text-center offset-1 rounded-lg font-weight-light">SL</div>
+                <div id="r-button-sr" class="border border-dark col-1 text-center offset-3 rounded-lg font-weight-light">SR</div>
+              </div>
+              <div class="row m-3">
+                <div id="r-button-home" class="border border-dark col-1 text-center offset-0 rounded-lg font-weight-light align-self-center">Home</div>
+                <div id="r-button-y" class="border border-dark col-1 text-center offset-4 rounded-lg font-weight-light align-self-center">Y</div>
+                <div id="r-button-plus" class="border border-dark col-1 text-center offset-1 rounded-lg font-weight-light align-self-center">Plus</div>
+              </div>
+              <div class="row m-3">
+                <div class="col-1 align-self-center offset-2">
+                  <div class="button-stick border border-dark rounded-circle" id="r-button-stickr">
+                    <div class="button-stick-hat rounded-circle" id="r-stick-hat"></div>
+                  </div>
+                </div>
+                <div id="r-button-b" class="border border-dark col-1 text-center offset-1 rounded-lg font-weight-light align-self-center">B</div>
+                <div id="r-button-x" class="border border-dark col-1 text-center offset-1 rounded-lg font-weight-light align-self-center">X</div>
+                <div id="r-button-r" class="border border-dark col-1 text-center offset-2 rounded-lg font-weight-light align-self-stretch">R</div>
+                <div id="r-button-zr" class="border border-dark col-1 text-center offset-1 rounded-lg font-weight-light align-self-stretch">ZR</div>
+              </div>
+              <div class="row m-3">
+                <div id="r-button-a" class="border border-dark col-1 text-center offset-5 rounded-lg font-weight-light align-self-center">A</div>
+              </div>
+            </div>
+            <div id="button-joycon-l" class="my-3 border px-3 pt-3">
+              <h3>Joy-Con (L)</h3>
+              <div class="row m-3">
+                <div id="l-button-sl" class="border border-dark col-1 text-center offset-5 rounded-lg font-weight-light">SL</div>
+                <div id="l-button-sr" class="border border-dark col-1 text-center offset-3 rounded-lg font-weight-light">SR</div>
+              </div>
+              <div class="row m-3">
+                <div id="l-button-minus" class="border border-dark col-1 text-center offset-3 rounded-lg font-weight-light align-self-center">Minus</div>
+                <div id="l-button-right" class="border border-dark col-1 text-center offset-4 rounded-lg font-weight-light align-self-center">Right</div>
+                <div id="l-button-capture" class="border border-dark col-1 text-center offset-2 rounded-lg font-weight-light align-self-center">Capture</div>
+              </div>
+              <div class="row m-3">
+                <div id="l-button-zl" class="border border-dark col-1 text-center offset-0 rounded-lg font-weight-light align-self-stretch">ZL</div>
+                <div id="l-button-l" class="border border-dark col-1 text-center offset-1 rounded-lg font-weight-light align-self-stretch">L</div>
+                <div class="col-1 align-self-center offset-2">
+                  <div class="button-stick border border-dark rounded-circle" id="l-button-stickl">
+                    <div class="button-stick-hat rounded-circle" id="l-stick-hat"></div>
+                  </div>
+                </div>
+                <div id="l-button-up" class="border border-dark col-1 text-center offset-1 rounded-lg font-weight-light align-self-center">Up</div>
+                <div id="l-button-down" class="border border-dark col-1 text-center offset-1 rounded-lg font-weight-light align-self-center">Down</div>
+                
+              </div>
+              <div class="row m-3">
+                <div id="l-button-left" class="border border-dark col-1 text-center offset-8 rounded-lg font-weight-light align-self-center">Left</div>
+              </div>
+            </div>
+          </div>
+          <!--IMU-->
+          <div class="border px-3 pt-3 my-3">
+            <div class="d-flex justify-content-between">
+              <h3>6-Axis sensor</h3>
+              <button type="button" class="btn btn-info my-2" data-toggle="button" aria-pressed="false" autocomplete="off" id="enable-imu-btn">
+                Enable IMU
+              </button>
+            </div>
+            <div class="form-group row">
+              <lable for="accelerometer-0" class="col-sm-3 col-form-label">Accelerometer [G] (0ms)</lable>
+              <div class="col-sm-3">
+                <input class="form-control text-center" type="text" placeholder="" readonly id="accelerometer-0-x">
+              </div>
+              <div class="col-sm-3">
+                <input class="form-control text-center" type="text" placeholder="" readonly id="accelerometer-0-y">
+              </div>
+              <div class="col-sm-3">
+                <input class="form-control text-center" type="text" placeholder="" readonly id="accelerometer-0-z">
+              </div>
+            </div>
+            <div class="form-group row">
+              <lable for="accelerometer-5" class="col-sm-3 col-form-label">Accelerometer [G] (5ms)</lable>
+              <div class="col-sm-3">
+                <input class="form-control text-center" type="text" placeholder="" readonly id="accelerometer-5-x">
+              </div>
+              <div class="col-sm-3">
+                <input class="form-control text-center" type="text" placeholder="" readonly id="accelerometer-5-y">
+              </div>
+              <div class="col-sm-3">
+                <input class="form-control text-center" type="text" placeholder="" readonly id="accelerometer-5-z">
+              </div>
+            </div>
+            <div class="form-group row">
+              <lable for="accelerometer-10" class="col-sm-3 col-form-label">Accelerometer [G] (10ms)</lable>
+              <div class="col-sm-3">
+                <input class="form-control text-center" type="text" placeholder="" readonly id="accelerometer-10-x">
+              </div>
+              <div class="col-sm-3">
+                <input class="form-control text-center" type="text" placeholder="" readonly id="accelerometer-10-y">
+              </div>
+              <div class="col-sm-3">
+                <input class="form-control text-center" type="text" placeholder="" readonly id="accelerometer-10-z">
+              </div>
+            </div>
+            <div class="form-group row">
+              <lable for="gyroscope-0" class="col-sm-3 col-form-label">Gyroscope [dps] (0ms)</lable>
+              <div class="col-sm-3">
+                <input class="form-control text-center" type="text" placeholder="" readonly id="gyroscope-0-x">
+              </div>
+              <div class="col-sm-3">
+                <input class="form-control text-center" type="text" placeholder="" readonly id="gyroscope-0-y">
+              </div>
+              <div class="col-sm-3">
+                <input class="form-control text-center" type="text" placeholder="" readonly id="gyroscope-0-z">
+              </div>
+            </div>
+            <div class="form-group row">
+              <lable for="gyroscope-5" class="col-sm-3 col-form-label">Gyroscope [dps] (5ms)</lable>
+              <div class="col-sm-3">
+                <input class="form-control text-center" type="text" placeholder="" readonly id="gyroscope-5-x">
+              </div>
+              <div class="col-sm-3">
+                <input class="form-control text-center" type="text" placeholder="" readonly id="gyroscope-5-y">
+              </div>
+              <div class="col-sm-3">
+                <input class="form-control text-center" type="text" placeholder="" readonly id="gyroscope-5-z">
+              </div>
+            </div>
+            <div class="form-group row">
+              <lable for="gyroscope-10" class="col-sm-3 col-form-label">Gyroscope [dps] (10ms)</lable>
+              <div class="col-sm-3">
+                <input class="form-control text-center" type="text" placeholder="" readonly id="gyroscope-10-x">
+              </div>
+              <div class="col-sm-3">
+                <input class="form-control text-center" type="text" placeholder="" readonly id="gyroscope-10-y">
+              </div>
+              <div class="col-sm-3">
+                <input class="form-control text-center" type="text" placeholder="" readonly id="gyroscope-10-z">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade show" id="nfc-ir-page" role="tabpanel" aria-labelledby="nfc-ir-tab">
+
+        <div class="shadow my-5 px-4 py-3 rounded-lg">
+          <h2>Setting for NFC/IR</h2>
+          <form>
+            <div class="form-group row">
+              <label for="" class="col-sm-3 col-form-label">Toggle input mode</label>
+              <div class="col-sm-5 btn-group btn-group-toggle" data-toggle="buttons">
+                <label class="btn btn-info active">
+                  <input type="radio" name="input-mode-mcu" id="input-mode-mcu-simple-btn" autocomplete="off" checked> Simple HID mode
+                </label>
+                <label class="btn btn-info">
+                  <input type="radio" name="input-mode-mcu" id="input-mode-mcu-nfc-ir-btn" autocomplete="off"> NFC/IR mode
+                </label>
+              </div>
+            </div>
+            <div class="form-group row">
+              <lable for="" class="col-sm-3 col-form-label">Set MCU state</lable>
+              <div class="col-sm-4 btn-group btn-group-toggle my-2" data-toggle="buttons">
+                <label class="btn btn-info active">
+                  <input type="radio" name="input-mode-mcu" id="mcu-suspend-btn" autocomplete="off" checked>Suspend
+                </label>
+                <label class="btn btn-info">
+                  <input type="radio" name="input-mode-mcu" id="mcu-resume-btn" autocomplete="off">Resume
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="shadow my-5 px-4 py-3 rounded-lg" id="device-info">
+          <h2 class="my-1">Request MCU state</h2>
+          <div class="form-group row">
+            <lable for="mcu-firmware-ver" class="col-sm-3 col-form-label">MCU Firmware version</lable>
+            <div class="col-sm-9">
+              <input class="form-control" type="text" placeholder="" readonly id="mcu-firmware-ver">
+            </div>
+          </div>
+          <div class="form-group row">
+            <lable for="mcu-state" class="col-sm-3 col-form-label">MCU State</lable>
+            <div class="col-sm-9">
+              <input class="form-control" type="text" placeholder="" readonly id="mcu-state">
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="offset-sm-0 col-2">
+              <button type="button" class="btn btn-primary btn-block" id="nfc-mode-btn">NFC mode</button>
+            </div>
+            <div class="offset-sm-0 col-2">
+              <button type="button" class="btn btn-primary btn-block" id="ir-mode-btn">IR mode</button>
+            </div>
+            <div class="offset-sm-6 col-2">
+              <button type="button" class="btn btn-primary btn-block" id="request-mcu-state-btn">Get</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="shadow my-5 px-4 py-3 rounded-lg">
+          <h2>&lt;NFC> Polling to target</h2>
+          <div class="form-group row">
+            <lable for="mcu-nfc-result" class="col-sm-3 col-form-label">NFC Result</lable>
+            <div class="col-sm-9">
+              <input class="form-control" type="text" placeholder="" readonly id="mcu-nfc-result">
+            </div>
+          </div>
+          <div class="form-group row">
+            <lable for="mcu-nfc-input-type" class="col-sm-3 col-form-label">Input Type</lable>
+            <div class="col-sm-9">
+              <input class="form-control" type="text" placeholder="" readonly id="mcu-nfc-input-type">
+            </div>
+          </div>
+          <div class="form-group row">
+            <lable for="mcu-nfc-ic-state" class="col-sm-3 col-form-label">NFC IC State</lable>
+            <div class="col-sm-9">
+              <input class="form-control" type="text" placeholder="" readonly id="mcu-nfc-ic-state">
+            </div>
+          </div>
+          <div class="form-group row">
+            <lable for="mcu-nfc-tag-ic" class="col-sm-3 col-form-label">NFC Tag IC</lable>
+            <div class="col-sm-9">
+              <input class="form-control" type="text" placeholder="" readonly id="mcu-nfc-tag-ic">
+            </div>
+          </div>
+          <div class="form-group row">
+            <lable for="mcu-nfc-type" class="col-sm-3 col-form-label">NFC Type</lable>
+            <div class="col-sm-9">
+              <input class="form-control" type="text" placeholder="" readonly id="mcu-nfc-type">
+            </div>
+          </div>
+          <div class="form-group row">
+            <lable for="mcu-nfc-uid" class="col-sm-3 col-form-label">UID/IDm</lable>
+            <div class="col-sm-9">
+              <input class="form-control" type="text" placeholder="" readonly id="mcu-nfc-uid">
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-1 offset-sm-9" style="visibility: hidden;" id="polling-btn-spinner">
+              <div class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </div>
+            <div class="offset-sm-0 col-2">
+              <button type="button" class="btn btn-primary col-12" id="mcu-nfc-polling-btn">Polling</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!--
+      <div class="tab-pane fade show" id="spi-page" role="tabpanel" aria-labelledby="spi-tab">
+      </div>-->
+
+      <div class="tab-pane fade show" id="setting-page" role="tabpanel" aria-labelledby="setting-tab">
+        <div class="shadow-sm bg-light mt-5 ml-5 mr-5 p-3 rounded">
+          <p class="font-weight-bold">
+            Advanced settings
+          </p>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="display-debug-btn">
+            <label class="form-check-label" for="display-debug-btn">
+              ログをコンソールに表示する
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="not-connected-modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Error</h5>
+        </div>
+        <div class="modal-body">
+          Can not send report to Controller. Did you connect Joy-Con or Pro Controller to host?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="not-have-mcu-modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Error</h5>
+        </div>
+        <div class="modal-body">
+          This device can not send MCU command. Please use Joy-Con (R) or Pro Controller.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+  <script>
+    $('[data-toggle="tooltip"]').tooltip();
+  </script>
+</body>
+</html>
