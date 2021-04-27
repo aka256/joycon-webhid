@@ -2,6 +2,20 @@
 <html lang="jp">
 <head>
   <meta charset="utf-8"/>
+
+  <title>トップページ | Joy-Con with WebHID</title>
+
+  <meta property="og:url" content="https://aka256.github.io/joycon-webhid/" />
+  <meta property="og:title" content="トップページ | Joy-Con with WebHID" />
+  <meta property="og:description" content="Google Chrome89にてサポートされたWebHIDを用いて、Joy-Conの諸々の操作をテストするために作成した。なお、Joy-Conとの通信に関するほとんどの情報はNintendo_Switch_Reverse_Engineeringを参考にしている。" />
+  <meta property="og:image" content="./img/favicon.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@Re16d5" />
+  <meta property="og:site_name" content="Joy-Con with WebHID" />
+  <meta property="og:locale" content="ja_JP" />
+
+  <link rel="icon" href="./img/favicon.png" sizes="48x48" type="image/png" /> 
+
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
     integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
     crossorigin="anonymous"></script>
@@ -14,6 +28,17 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
     integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
   <link rel="stylesheet" type="text/css" href="./css/style.css">
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-169658702-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-169658702-2');
+  </script>
+
 </head>
 
 <body class="body">
@@ -37,7 +62,7 @@
   <div class="container-xl shadow-sm bg-white p-3">
     <h1>トップページ</h1>
     <h2>概要</h2>
-    <p>WebHIDを用いて、Joy-Conの諸々の操作をテストするために作成した。なお、Joy-Conとの通信に関するほとんどの情報は<cite>Nintendo_Switch_Reverse_Engineering</cite>を参照した。</p>
+    <p>Google Chrome89にてサポートされたWebHIDを用いて、Joy-Conの諸々の操作をテストするために作成した。なお、Joy-Conとの通信に関するほとんどの情報は<cite>Nintendo_Switch_Reverse_Engineering</cite>を参考にしている。</p>
 
     <h2>Joy-Con Operation Tester</h2>
     <h3>機能</h3>
