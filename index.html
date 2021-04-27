@@ -65,6 +65,7 @@
     <p>Google Chrome89にてサポートされたWebHIDを用いて、Joy-Conの諸々の操作をテストするために作成した。なお、Joy-Conとの通信に関するほとんどの情報は<cite>Nintendo_Switch_Reverse_Engineering</cite>を参考にしている。</p>
 
     <h2>Joy-Con Operation Tester</h2>
+    <a href="./pages/operation.html" class="display-4">→Let's Go!</a>
     <h3>機能</h3>
     <h4>Home</h4>
     <ul>
@@ -124,214 +125,18 @@
       <li><a href="https://github.com/CTCaer/Nintendo_Switch_Reverse_Engineering/blob/ir-nfc/mcu_ir_nfc_notes.md">IR/NFC MCU - Nintendo_Switch_Reverse_Engineering</a>, CTCaer</li>
     </ol>
   </div>
-  <!--
-  <div id="main" class="container">
-    <h1>Joy-Con Operation Tester</h1>
-    <div>
-      <button type="button" class="btn btn-primary" id="ConnectButton">Connect to Joy-Con</button>
-    </div>
-
-    <table class="table table-bordered">
-      <thead class="thead-dark">
-        <tr class="top-column">
-          <th></th>
-          <th>Joy-Con L</th>
-          <th>Joy-Con R</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th scope="row" class="top-row">Button Stata</th>
-          <td><canvas id="JoyConLCanvas"></canvas></td>
-          <td><canvas id="JoyConRCanvas"></canvas></td>
-        </tr>
-        <tr>
-          <th scope="row" class="top-row">Player Light</th>
-          <td>
-            <table class="table table-borderless">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>1</th>
-                  <th>2</th>
-                  <th>3</th>
-                  <th>4</th>
-                </tr>
-              </thead>
-              <tr>
-                <th>Keep on</th>
-                <td><input type="checkbox" name="JoyConLLight" value="0"></td>
-                <td><input type="checkbox" name="JoyConLLight" value="1"></td>
-                <td><input type="checkbox" name="JoyConLLight" value="2"></td>
-                <td><input type="checkbox" name="JoyConLLight" value="3"></td>
-              </tr>
-              <tr>
-                <th>Flash</th>
-                <td><input type="checkbox" name="JoyConLLight" value="4"></td>
-                <td><input type="checkbox" name="JoyConLLight" value="5"></td>
-                <td><input type="checkbox" name="JoyConLLight" value="6"></td>
-                <td><input type="checkbox" name="JoyConLLight" value="7"></td>
-                <td><button type="button" class="btn btn-dark btn-sm" id="JoyConLLightButton">Set</button></td>
-              </tr>
-            </table>
-          </td>
-          <td>
-            <table class="table table-borderless">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th>1</th>
-                  <th>2</th>
-                  <th>3</th>
-                  <th>4</th>
-                </tr>
-              </thead>
-              <tr>
-                <th>Keep on</th>
-                <td><input type="checkbox" name="JoyConRLight" value="0" id="k1"></td>
-                <td><input type="checkbox" name="JoyConRLight" value="1" id="k2"></td>
-                <td><input type="checkbox" name="JoyConRLight" value="2" id="k3"></td>
-                <td><input type="checkbox" name="JoyConRLight" value="3" id="k4"></td>
-              </tr>
-              <tr>
-                <th>Flash</th>
-                <td><input type="checkbox" name="JoyConRLight" value="4" id="f1"></td>
-                <td><input type="checkbox" name="JoyConRLight" value="5" id="f2"></td>
-                <td><input type="checkbox" name="JoyConRLight" value="6" id="f3"></td>
-                <td><input type="checkbox" name="JoyConRLight" value="7" id="f4"></td>
-                <td><button type="button" class="btn btn-dark btn-sm" id="JoyConRLightButton">Set</td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <th scope="row" class="top-row">Rumble</th>
-          <td>
-            <table class="table table-borderless">
-              <tr>
-                <th>Low Frequency</th>
-                <th><input type="number" id="JoyConLRumbleLowFreq" placeholder="160" min=41 max=626 step=1 value=160>
-                </th>
-              </tr>
-              <tr>
-                <th>Low Amplitude</th>
-                <th><input type="number" id="JoyConLRumbleLowAmpli" min=0 max=1 step=0.001 placeholder="0" value=0></th>
-              </tr>
-              <tr>
-                <th>High Frequency</th>
-                <th><input type="number" id="JoyConLRumbleHighFreq" placeholder="320" min=82 max=1253 step=1 value=320>
-                </th>
-              </tr>
-              <tr>
-                <th>High Amplitude</th>
-                <th><input type="number" id="JoyConLRumbleHighAmpli" min=0 max=1 step=0.001 placeholder="0" value=0>
-                </th>
-                <th><button type="button" class="btn btn-dark btn-sm" id="lRumbleButton">Set</button></th>
-              </tr>
-            </table>
-          </td>
-          <td>
-            <table class="table table-borderless">
-              <tr>
-                <th>Low Frequency</th>
-                <th><input type="number" id="JoyConRRumbleLowFreq" placeholder="160" min=41 max=626 step=1 value=160>
-                </th>
-              </tr>
-              <tr>
-                <th>Low Amplitude</th>
-                <th><input type="number" id="JoyConRRumbleLowAmpli" min=0 max=1 step=0.001 placeholder="0" value=0></th>
-              </tr>
-              <tr>
-                <th>High Frequency</th>
-                <th><input type="number" id="JoyConRRumbleHighFreq" placeholder="320" min=82 max=1253 step=1 value=320>
-                </th>
-              </tr>
-              <tr>
-                <th>High Amplitude</th>
-                <th><input type="number" id="JoyConRRumbleHighAmpli" min=0 max=1 step=0.001 placeholder="0" value=0>
-                </th>
-                <th><button type="button" class="btn btn-dark btn-sm" id="lRumbleButton">Set</button></th>
-              </tr>
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <th scope="row" class="top-row">Rumble</th>
-          <td>
-            <form>
-              <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">Low Frequency</span>
-                </div>
-                <input type="number" class="form-control" placeholder="0">
-                <div class="input-group-append">
-                  <span class="input-group-text"><input type="checkbox" checked=true></span>
-                </div>
-              </div>
-              <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">Low Amplitude</span>
-                </div>
-                <input type="number" class="form-control" placeholder=0>
-                <div class="input-group-append">
-                  <span class="input-group-text"><input type="checkbox" checked=true></span>
-                </div>
-              </div>
-              <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">High Frequency</span>
-                </div>
-                <input type="number" class="form-control" placeholder=0>
-                <div class="input-group-append">
-                  <span class="input-group-text"><input type="checkbox" checked=true></span>
-                </div>
-              </div>
-              <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">High Amplitude</span>
-                </div>
-                <input type="number" class="form-control" placeholder=0>
-                <div class="input-group-append">
-                  <span class="input-group-text"><input type="checkbox" checked=true></span>
-                </div>
-              </div>
-              <button type="button" class="btn btn-dark btn-sm" id="lRumbleButton">Set</button>
-            </form>
-          </td>
-          <td>
-            <form>
-              <div class="form-group row">
-                <label>Low Frequency</label>
-                <div class="col-auto">
-                  <input type="number" class="form-control" placeholder=0>
-                </div>
-              </div>
-              <div class="form-group row">
-                <label>Low Amplitude</label>
-                <div class="col-auto">
-                  <input type="number" class="form-control" placeholder=0>
-                </div>
-              </div>
-            </form>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <form>
-    <div class="form-group row">
-      <label>Low Frequency</label>
-      <div class="col-sm-10">
-        <input type="number" class="form-control" placeholder=0>
+  
+  <footer class="container-xl bg-light py-5 border border-right-0 border-left-0 border-bottom-0">
+    <div class="text-center">
+      <div class="d-flex justify-content-center">
+        <div class="px-4">
+          GitHub: <a href="https://github.com/aka256/joycon-webhid">Page source</a>
+        </div>
+        <div class="px-4">
+          Contact: <a href="https://twitter.com/Re16d5">Twitter @Re16d5</a>
+        </div>
       </div>
     </div>
-    <div class="form-group row">
-      <label>Low Amplitude</label>
-      <div class="col-sm-10">
-        <input type="number" class="form-control" placeholder=0>
-      </div>
-    </div>
-  </form>
--->
+  </footer>
 </body>
 </html>
