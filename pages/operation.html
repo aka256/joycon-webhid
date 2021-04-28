@@ -349,6 +349,61 @@
             </div>
           </div>
         </div>
+
+        <div class="shadow my-5 px-4 py-3 rounded-lg">
+          <div class="d-flex justify-content-between">
+            <h2>HD Rumble</h2>
+            <button type="button" class="btn btn-info my-2" data-toggle="button" aria-pressed="false" autocomplete="off" id="enable-rumble-btn">
+              Enable Rumble
+            </button>
+          </div>
+  
+          <div class="row">
+            <div class="col-4 offset-3 text-center">Left</div>
+            <div class="col-4 offset-1 text-center">Right</div>
+          </div>
+          <div class="row">
+            <div class="col-2 offset-3 text-center">Frequency</div>
+            <div class="col-2 text-center">Amplitude</div>
+            <div class="col-2 offset-1 text-center">Frequency</div>
+            <div class="col-2 text-center">Amplitude</div>
+          </div>
+          <div class="form-group row">
+            <label class="col-3 col-form-label">High band</label>
+            <div class="col-2">
+              <input type="number" class="form-control" id="rumble-left-high-freq" value=320 min=82 max=1253>
+            </div>
+            <div class="col-2">
+              <input type="number" class="form-control" id="rumble-left-high-ampli" value=0 min=0 max=1 step=0.001>
+            </div>
+            <div class="col-2 offset-1">
+              <input type="number" class="form-control" id="rumble-right-high-freq" value=320 min=82 max=1253>
+            </div>
+            <div class="col-2">
+              <input type="number" class="form-control" id="rumble-right-high-ampli" value=0 min=0 max=1 step=0.001>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-3 col-form-label">Low band</label>
+            <div class="col-2">
+              <input type="number" class="form-control" id="rumble-left-low-freq" value=160 min=41 max=626>
+            </div>
+            <div class="col-2">
+              <input type="number" class="form-control" id="rumble-left-low-ampli" value=0 min=0 max=1 step=0.001>
+            </div>
+            <div class="col-2 offset-1">
+              <input type="number" class="form-control" id="rumble-right-low-freq" value=160 min=41 max=626>
+            </div>
+            <div class="col-2">
+              <input type="number" class="form-control" id="rumble-right-low-ampli" value=0 min=0 max=1 step=0.001>
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="offset-10 col-2">
+              <button type="button" class="btn btn-primary btn-block" id="rumble-set-btn">Set</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="tab-pane fade show" id="nfc-ir-page" role="tabpanel" aria-labelledby="nfc-ir-tab">

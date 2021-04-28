@@ -9,7 +9,7 @@ import { calcCrc8 } from "./helper";
  * @param subCommand 
  * @param argument 
  */
-export function writeOutputReport(device: HIDDevice, reportId: number, packetNumber: number, rumbleData: number[], subCommand: number, ...argument: number[]){
+export function writeOutputReport(device: HIDDevice, reportId: number, packetNumber: number, rumbleData: number[], subCommand: number = 0x00, ...argument: number[]){
   let n:BufferSource = Uint8Array.from([packetNumber].concat(rumbleData).concat([subCommand]).concat(argument));
   device.sendReport(reportId, n);
 }

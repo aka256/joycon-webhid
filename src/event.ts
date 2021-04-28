@@ -1,6 +1,6 @@
 import { writeOutputReport, writeOutputReport0x01Crc, writeOutputReport0x11Crc } from './output_report';
 import { NintendoVendorId, DefaultRumble, JoyConRProductId, ProConProductId } from './data';
-import { toHex, PacketManager, displayModal } from './helper';
+import { toHex, PacketManager, displayModal, encodeHighFreq, encodeHighAmpli,encodeLowFreq, encodeLowAmpli, arrayToHexString } from './helper';
 import { parseSimpleHIDInput, parseReplyDeviceInfo, parseStandardInput, parseMCUStateReport, parseNFCState } from './input_report';
 import { debugInfo } from './debug';
 
@@ -9,13 +9,33 @@ let connectedDevice: HIDDevice;
 async function initJoyCon() {
   // Simple HID modeへの変更
   writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x03, 0x3f);
+  
   //aria-pressedの反映まで20ms待機
-  await new Promise(resolve => setTimeout(resolve, 20))
+  await new Promise(resolve => setTimeout(resolve, 100))
+
   // Set player light1
   writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x30, 0x01);
+  // Player light1 Button の有効化
+  let playerLightOn1Btn = <HTMLInputElement>document.getElementById("player-light-on-1-btn");
+  playerLightOn1Btn.classList.add("active");
 
-  let element = <HTMLInputElement>document.getElementById("player-light-on-1-btn");
-  element.classList.add("active");
+  // Send rumble
+  let encodedHighFreq = encodeHighFreq(320);
+  let encodedHighAmpli = encodeHighAmpli(0.2);
+  let encodedLowFreq = encodeLowFreq(160);
+  let encodedLowAmpli = encodeLowAmpli(0.2);
+
+  let rumbleData: number[] = [];
+  rumbleData.push(encodedHighFreq & 0xff);
+  rumbleData.push(encodedHighAmpli + ((encodedHighFreq >> 8) & 0xff));
+  rumbleData.push(encodedLowFreq + ((encodedLowAmpli >> 8) & 0xff));
+  rumbleData.push(encodedLowAmpli & 0xff);
+  rumbleData.push(encodedHighFreq & 0xff);
+  rumbleData.push(encodedHighAmpli + ((encodedHighFreq >> 8) & 0xff));
+  rumbleData.push(encodedLowFreq + ((encodedLowAmpli >> 8) & 0xff));
+  rumbleData.push(encodedLowAmpli & 0xff);
+
+  writeOutputReport(connectedDevice, 0x10, PacketManager.get(), rumbleData);
 }
 
 /**
@@ -321,6 +341,71 @@ export async function setPlayerLights() {
   console.log("light arg:" + String(arg))
   try {
     writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x30, arg);
+  } catch (e) {
+    displayModal("not-connected-modal");
+    console.log(e);
+  }
+}
+
+export async function switchRumble() {
+  let element = <HTMLInputElement>document.querySelector("#enable-rumble-btn");
+  console.log("enable");
+  //aria-pressedの反映まで10ms待機
+  await new Promise(resolve => setTimeout(resolve, 10))
+
+  if (element.getAttribute("aria-pressed")==="true"){
+    try {
+      writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x48, 0x01);
+    } catch (e) {
+      displayModal("not-connected-modal");
+      console.log(e);
+    }
+  } else {
+    try {
+      writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x48, 0x00);
+    } catch (e) {
+      displayModal("not-connected-modal");
+      console.log(e);
+    }
+  }
+}
+
+/**
+ * 入力されたバイブレーションの実行を行う。
+ */
+export async function setRumble() {
+  // 入力内容の取得
+  let leftHighFreq = <HTMLInputElement>document.getElementById("rumble-left-high-freq");
+  let leftHighAmpli = <HTMLInputElement>document.getElementById("rumble-left-high-ampli");
+  let rightHighFreq = <HTMLInputElement>document.getElementById("rumble-right-high-freq");
+  let rightHighAmpli = <HTMLInputElement>document.getElementById("rumble-right-high-ampli");
+  let leftLowFreq = <HTMLInputElement>document.getElementById("rumble-left-low-freq");
+  let leftLowAmpli = <HTMLInputElement>document.getElementById("rumble-left-low-ampli");
+  let rightLowFreq = <HTMLInputElement>document.getElementById("rumble-right-low-freq");
+  let rightLowAmpli = <HTMLInputElement>document.getElementById("rumble-right-low-ampli");
+
+  // 送信用データへエンコード
+  let encodedLeftHighFreq = encodeHighFreq(Number(leftHighFreq.value));
+  let encodedLeftHighAmpli = encodeHighAmpli(Number(leftHighAmpli.value));
+  let encodedLeftLowFreq = encodeLowFreq(Number(leftLowFreq.value));
+  let encodedLeftLowAmpli = encodeLowAmpli(Number(leftLowAmpli.value));
+  let encodedRightHighFreq = encodeHighFreq(Number(rightHighFreq.value));
+  let encodedRightHighAmpli = encodeHighAmpli(Number(rightHighAmpli.value));
+  let encodedRightLowFreq = encodeLowFreq(Number(rightLowFreq.value));
+  let encodedRightLowAmpli = encodeLowAmpli(Number(rightLowAmpli.value));
+
+  let rumbleData: number[] = [];
+  rumbleData.push(encodedLeftHighFreq & 0xff);
+  rumbleData.push(encodedLeftHighAmpli + ((encodedLeftHighFreq >> 8) & 0xff));
+  rumbleData.push(encodedLeftLowFreq + ((encodedLeftLowAmpli >> 8) & 0xff));
+  rumbleData.push(encodedLeftLowAmpli & 0xff);
+  rumbleData.push(encodedRightHighFreq & 0xff);
+  rumbleData.push(encodedRightHighAmpli + ((encodedRightHighFreq >> 8) & 0xff));
+  rumbleData.push(encodedRightLowFreq + ((encodedRightLowAmpli >> 8) & 0xff));
+  rumbleData.push(encodedRightLowAmpli & 0xff);
+
+  try {
+    writeOutputReport(connectedDevice, 0x10, PacketManager.get(), rumbleData);
   } catch (e) {
     displayModal("not-connected-modal");
     console.log(e);
