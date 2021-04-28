@@ -10,7 +10,7 @@ async function initJoyCon() {
   // Simple HID modeへの変更
   writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x03, 0x3f);
   
-  //aria-pressedの反映まで20ms待機
+  // 100ms待機
   await new Promise(resolve => setTimeout(resolve, 100))
 
   // Set player light1
@@ -19,11 +19,16 @@ async function initJoyCon() {
   let playerLightOn1Btn = <HTMLInputElement>document.getElementById("player-light-on-1-btn");
   playerLightOn1Btn.classList.add("active");
 
+  // 100ms待機
+  await new Promise(resolve => setTimeout(resolve, 100))
+
+  writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x48, 0x01);
+
   // Send rumble
   let encodedHighFreq = encodeHighFreq(320);
-  let encodedHighAmpli = encodeHighAmpli(0.2);
+  let encodedHighAmpli = encodeHighAmpli(0.3);
   let encodedLowFreq = encodeLowFreq(160);
-  let encodedLowAmpli = encodeLowAmpli(0.2);
+  let encodedLowAmpli = encodeLowAmpli(0.3);
 
   let rumbleData: number[] = [];
   rumbleData.push(encodedHighFreq & 0xff);
@@ -36,6 +41,11 @@ async function initJoyCon() {
   rumbleData.push(encodedLowAmpli & 0xff);
 
   writeOutputReport(connectedDevice, 0x10, PacketManager.get(), rumbleData);
+
+  // 250ms待機
+  await new Promise(resolve => setTimeout(resolve, 250))
+
+  writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x48, 0x00);
 }
 
 /**
@@ -338,7 +348,7 @@ export async function setPlayerLights() {
   if (lightFlash4Btn.getAttribute("aria-pressed")==="true") {
     arg += 0x80;
   }
-  console.log("light arg:" + String(arg))
+
   try {
     writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x30, arg);
   } catch (e) {
@@ -349,7 +359,7 @@ export async function setPlayerLights() {
 
 export async function switchRumble() {
   let element = <HTMLInputElement>document.querySelector("#enable-rumble-btn");
-  console.log("enable");
+
   //aria-pressedの反映まで10ms待機
   await new Promise(resolve => setTimeout(resolve, 10))
 
