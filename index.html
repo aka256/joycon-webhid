@@ -62,9 +62,11 @@
     </nav>
   </div>
   <div class="container-xl shadow-sm bg-white p-3">
-    <h1>トップページ</h1>
-    <h2>概要</h2>
-    <p>Google Chrome89にてサポートされたWebHIDを用いて、Joy-Conの諸々の操作をテストするために作成した。なお、Joy-Conとの通信に関するほとんどの情報は<cite>Nintendo_Switch_Reverse_Engineering</cite>を参考にしている。</p>
+    <h1 class="border bg-light p-3">トップページ</h1>
+    <h2>はじめに</h2>
+    <p>
+      Joy-ConはBluetoothを通し、HIDデバイス(<s class="text-muted">Human Intarface Device Device</s>)として機能している。なので、デバイス内のフラッシュメモリの情報やボタンの状態の取得、そしてNFCやIRカメラの操作なども可能である。それらの行うためのコマンド等は有志によって解析されている。(<a href="https://github.com/dekuNukem/Nintendo_Switch_Reverse_Engineering">Nintendo_Switch_Reverse_Engineering</a>)そこで、これらのコマンドを利用してやろうとPythonのhidapiを用いてあれこれ試してみたところ、ある程度勝手がわかってきたのでそれらをWebHIDを用いて実装してみた。<a href="https://wicg.github.io/webhid/">WenHID</a>とはWeb上でHIDデバイスを操作するためのAPIらしい。これは私が普段利用しているGoogle Chrome89にて正式にサポートされるようになったことから、都合がいいのでこれを利用してみた。
+    </p>
 
     <h2>Joy-Con Operation Tester</h2>
     <a href="./pages/operation.html" class="display-4">→Let's Go!</a>
@@ -92,7 +94,7 @@
       <li>PCとJoy-ConとをBluetoothによりペアリングを行う。</li>
       <li><a href="./pages/operation.html">Joy-Con Operation Tester</a>に移動し、Connectボタンをクリックする。</li>
       <li>HIDデバイスとの接続を要求されるので、Joy-Conを選択する。</li>
-      <li>以上。</li>
+      <li>Player Lightの一番上のみが点灯し、コントローラが振動したら接続成功。</li>
     </ol>
 
     <h3>実装予定</h3>
