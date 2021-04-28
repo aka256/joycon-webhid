@@ -1,15 +1,21 @@
 import { writeOutputReport, writeOutputReport0x01Crc, writeOutputReport0x11Crc } from './output_report';
 import { NintendoVendorId, DefaultRumble, JoyConRProductId, ProConProductId } from './data';
-import { toHex, PacketManager } from './helper';
+import { toHex, PacketManager, displayModal } from './helper';
 import { parseSimpleHIDInput, parseReplyDeviceInfo, parseStandardInput, parseMCUStateReport, parseNFCState } from './input_report';
 import { debugInfo } from './debug';
 
 let connectedDevice: HIDDevice;
 
-function displayModal(id: string){
-  //let element = <Modal><unknown>document.getElementById("not-connected-modal");
-  //element.show();
-  $('#'+id).modal('show')
+async function initJoyCon() {
+  // Simple HID modeへの変更
+  writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x03, 0x3f);
+  //aria-pressedの反映まで20ms待機
+  await new Promise(resolve => setTimeout(resolve, 20))
+  // Set player light1
+  writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x30, 0x01);
+
+  let element = <HTMLInputElement>document.getElementById("player-light-on-1-btn");
+  element.classList.add("active");
 }
 
 /**
@@ -28,6 +34,9 @@ export async function controlHID() {
   if (device){
     await device.open();
     
+    // 初期化処理
+    initJoyCon();
+
     // Input Reportの処理
     device.addEventListener("inputreport", event=>{
       const {data, device, reportId} = event;
@@ -113,7 +122,11 @@ export async function switchStandardInput() {
 
 export async function switchIMU() {
   let element = <HTMLInputElement>document.querySelector("#enable-imu-btn");
-  if (element.getAttribute("aria-pressed")==="false"){
+
+  //aria-pressedの反映まで10ms待機
+  await new Promise(resolve => setTimeout(resolve, 10))
+
+  if (element.getAttribute("aria-pressed")==="true"){
     try {
       writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x40, 0x01);
     } catch (e) {
@@ -264,5 +277,52 @@ export async function pollingToTarget() {
     }
   } else {
     displayModal("not-have-mcu-modal");
+  }
+}
+
+export async function setPlayerLights() {
+  let lightOn1Btn = <HTMLInputElement>document.getElementById("player-light-on-1-btn");
+  let lightOn2Btn = <HTMLInputElement>document.getElementById("player-light-on-2-btn");
+  let lightOn3Btn = <HTMLInputElement>document.getElementById("player-light-on-3-btn");
+  let lightOn4Btn = <HTMLInputElement>document.getElementById("player-light-on-4-btn");
+  let lightFlash1Btn = <HTMLInputElement>document.getElementById("player-light-flash-1-btn");
+  let lightFlash2Btn = <HTMLInputElement>document.getElementById("player-light-flash-2-btn");
+  let lightFlash3Btn = <HTMLInputElement>document.getElementById("player-light-flash-3-btn");
+  let lightFlash4Btn = <HTMLInputElement>document.getElementById("player-light-flash-4-btn");
+  let arg = 0;
+
+  //aria-pressedの反映まで10ms待機
+  await new Promise(resolve => setTimeout(resolve, 10))
+
+  if (lightOn1Btn.getAttribute("aria-pressed")==="true") {
+    arg += 0x01;
+  }
+  if (lightOn2Btn.getAttribute("aria-pressed")==="true") {
+    arg += 0x02;
+  }
+  if (lightOn3Btn.getAttribute("aria-pressed")==="true") {
+    arg += 0x04;
+  }
+  if (lightOn4Btn.getAttribute("aria-pressed")==="true") {
+    arg += 0x08;
+  }
+  if (lightFlash1Btn.getAttribute("aria-pressed")==="true") {
+    arg += 0x10;
+  }
+  if (lightFlash2Btn.getAttribute("aria-pressed")==="true") {
+    arg += 0x20;
+  }
+  if (lightFlash3Btn.getAttribute("aria-pressed")==="true") {
+    arg += 0x40;
+  }
+  if (lightFlash4Btn.getAttribute("aria-pressed")==="true") {
+    arg += 0x80;
+  }
+  console.log("light arg:" + String(arg))
+  try {
+    writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x30, arg);
+  } catch (e) {
+    displayModal("not-connected-modal");
+    console.log(e);
   }
 }

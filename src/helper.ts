@@ -1,9 +1,21 @@
 import { RumbleFrequencyLowerLimit, RumbleFrequencyUpperLimit } from './data';
 
+/**
+ * 16進表記に0xを付与する。
+ * @param n 16進表記にする数
+ * @param m 0-paddingする数
+ * @returns 16進表記にした文字列
+ */
 export function toHex(n: number, m: number = 2): string {
   return '0x' + ("0".repeat(m) + n.toString(16)).slice(-1*m);
 }
 
+/**
+ * DataViewをArrayに変換する。
+ * @param data もととなるDataView
+ * @param len DataViewの変換する長さ
+ * @returns DataViewの変換後のArray
+ */
 export function dataViewToArray(data: DataView, len: number = data.byteLength): Array<number> {
   let arr:Array<number> = [];
   for(let i = 0;i<Math.min(data.byteLength, len);i++){
@@ -12,6 +24,11 @@ export function dataViewToArray(data: DataView, len: number = data.byteLength): 
   return arr;
 }
 
+/**
+ * High bandの周波数をエンコードする。
+ * @param rawFreq 周波数
+ * @returns エンコードされた周波数
+ */
 export function encodeHighFreq(rawFreq: number): number {
   rawFreq = Math.max(rawFreq, RumbleFrequencyLowerLimit);
   rawFreq = Math.min(rawFreq, RumbleFrequencyUpperLimit);
@@ -19,6 +36,11 @@ export function encodeHighFreq(rawFreq: number): number {
   return (Math.round(Math.log2(rawFreq / 10.0) * 32.0) - 0x60) * 4;
 }
 
+/**
+ * Low bandの周波数をエンコードする。
+ * @param rawFreq 周波数
+ * @returns エンコードされた周波数
+ */
 export function encodeLowFreq(rawFreq: number): number {
   rawFreq = Math.max(rawFreq, RumbleFrequencyLowerLimit);
   rawFreq = Math.min(rawFreq, RumbleFrequencyUpperLimit);
@@ -26,6 +48,11 @@ export function encodeLowFreq(rawFreq: number): number {
   return Math.round(Math.log2(rawFreq / 10.0) * 32.0) - 0x40;
 }
 
+/**
+ * High bandの振幅をエンコードする。
+ * @param rawFreq 振幅
+ * @returns エンコードされた振幅
+ */
 export function encodeHighAmpli(rawAmpli: number): number {
   let encodedAmpli = 0;
 
@@ -42,6 +69,11 @@ export function encodeHighAmpli(rawAmpli: number): number {
   return encodedAmpli * 2;
 }
 
+/**
+ * Low bandの振幅をエンコードする。
+ * @param rawFreq 振幅
+ * @returns エンコードされた振幅
+ */
 export function encodeLowAmpli(rawAmpli: number): number {
   let encodedAmpli = 0;
 
@@ -58,6 +90,9 @@ export function encodeLowAmpli(rawAmpli: number): number {
   return Math.floor(encodedAmpli / 2) + 64;
 }
 
+/**
+ * Output report用のpacket number管理クラス
+ */
 export class PacketManager{
   static packetNum = 0;
 
@@ -66,6 +101,11 @@ export class PacketManager{
   }
 }
 
+/**
+ * Arrayを16進数の文字列に変換する
+ * @param arr もととなるArray
+ * @returns 16進数の文字列
+ */
 export function arrayToHexString(arr: Array<number>): string {
   let retval = "";
   arr.forEach(element => {
@@ -108,6 +148,11 @@ const CRCTABLE8 = [
   0xDE, 0xD9, 0xD0, 0xD7, 0xC2, 0xC5, 0xCC, 0xCB,
   0xE6, 0xE1, 0xE8, 0xEF, 0xFA, 0xFD, 0xF4, 0xF3]
 
+/**
+ * CRC-8-CCITTの計算を行う。
+ * @param data もととなるデータ
+ * @returns 計算結果
+ */
 export function calcCrc8(data: Array<number>): number {
   let val = 0
   let pos = 0
@@ -151,6 +196,11 @@ const CRCTABLE16 = [
 	0x4400, 0x84c1, 0x8581, 0x4540, 0x8701, 0x47c0, 0x4680, 0x8641,
 	0x8201, 0x42c0, 0x4380, 0x8341, 0x4100, 0x81c1, 0x8081, 0x4040]
 
+/**
+ * CRC-16-CCITTの計算を行う。
+ * @param data もととなるデータ
+ * @returns 計算結果
+ */
 export function calcCrc16(data: Array<number>): number {
   let val = 0
   let pos = 0
@@ -158,4 +208,12 @@ export function calcCrc16(data: Array<number>): number {
     val = (val >> 8) ^ CRCTABLE16[(val ^ element) & 0x00ff]
   });
   return val
+}
+
+/**
+ * 指定されたIDのModalの表示を行う。
+ * @param id 対象ElementのID
+ */
+export function displayModal(id: string){
+  $('#'+id).modal('show')
 }

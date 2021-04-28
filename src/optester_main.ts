@@ -1,4 +1,4 @@
-import { controlHID, getDeviceInfo, switchSimpleHIDInput, switchStandardInput, switchIMU, switchSimpleHIDInputMCU, switchMCUInput, switchMCUSuspend, switchMCUResume, getMCUState, switchNFCMode, switchIRMode, pollingToTarget } from './event';
+import { controlHID, getDeviceInfo, switchSimpleHIDInput, switchStandardInput, switchIMU, switchSimpleHIDInputMCU, switchMCUInput, switchMCUSuspend, switchMCUResume, getMCUState, switchNFCMode, switchIRMode, pollingToTarget, setPlayerLights } from './event';
 import { debugMode, toggleDebugMode } from './debug';
 
 document.addEventListener("DOMContentLoaded", function(){
@@ -8,6 +8,14 @@ document.addEventListener("DOMContentLoaded", function(){
   document.querySelector("#input-mode-simple")?.addEventListener("click", switchSimpleHIDInput);
   document.querySelector("#input-mode-standard")?.addEventListener("click", switchStandardInput);
   document.querySelector("#enable-imu-btn")?.addEventListener("click", switchIMU);
+  document.querySelector("#player-light-on-1-btn")?.addEventListener("click", setPlayerLights);
+  document.querySelector("#player-light-on-2-btn")?.addEventListener("click", setPlayerLights);
+  document.querySelector("#player-light-on-3-btn")?.addEventListener("click", setPlayerLights);
+  document.querySelector("#player-light-on-4-btn")?.addEventListener("click", setPlayerLights);
+  document.querySelector("#player-light-flash-1-btn")?.addEventListener("click", setPlayerLights);
+  document.querySelector("#player-light-flash-2-btn")?.addEventListener("click", setPlayerLights);
+  document.querySelector("#player-light-flash-3-btn")?.addEventListener("click", setPlayerLights);
+  document.querySelector("#player-light-flash-4-btn")?.addEventListener("click", setPlayerLights);
   // NFC/IR
   document.querySelector("#input-mode-mcu-simple-btn")?.addEventListener("click", switchSimpleHIDInputMCU);
   document.querySelector("#input-mode-mcu-nfc-ir-btn")?.addEventListener("click", switchMCUInput);
