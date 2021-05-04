@@ -1,4 +1,8 @@
+import { exit } from 'node:process';
 import { RumbleFrequencyLowerLimit, RumbleFrequencyUpperLimit } from './data';
+import { debugInfo, debugMode } from './debug';
+import { requestFlashMemory } from './event';
+import { writeOutputReport } from './output_report';
 
 /**
  * 16進表記に0xを付与する。
@@ -216,4 +220,82 @@ export function calcCrc16(data: Array<number>): number {
  */
 export function displayModal(id: string){
   $('#'+id).modal('show')
+}
+
+/**
+ * Joy-Con内のフラッシュメモリのダンプの管理を行う。
+ */
+export class MemoryDumpManager {
+  static requestedQueue: number[][] = [];
+  static resendingCount = 0;
+  static sending = false;
+
+  /**
+   * データの要求の記録を行う。
+   * @param headAddr 要求データのヘッダアドレス
+   * @param length 要求データの長さ
+   * @returns データの要求が可能かどうか
+   */
+  static requestData(headAddr: number, length: number): boolean {
+    if (length<=0 || length>0x1d || headAddr<0) {
+      return false;
+    }
+    // enqueue
+    this.requestedQueue.push([headAddr, length]);
+    return true;
+  }
+
+  /**
+   * 返信データの確認を行う。
+   * ACK、NACKの確認、パケットロスであれば再送処理を行う。
+   * @param data 返信データ
+   * @returns 正規の返信データであるかどうか
+   */
+  static receiveData(data: DataView): boolean {
+    console.log(arrayToHexString(dataViewToArray(data)));
+    if (data.getUint8(12) === 0x90) {  //ACK
+      if (this.requestedQueue[0][0] === data.getUint16(14,true) && this.requestedQueue[0][1] === data.getUint8(18)) {
+        this.requestedQueue.splice(0,1);
+        return true;
+      }
+
+      if (this.resendingCount>2) {
+        debugInfo("Resending count is over.");
+        this.resendingCount = 0;
+        return false;
+      }
+
+      //再送処理
+      requestFlashMemory(data.getUint16(14), data.getUint8(18));
+      this.resendingCount++;
+      console.log("resending");
+
+      debugInfo("Recived data wasn't request.");
+      return false;
+    } else {  //NACK
+      if (this.sending === false) { //送信処理を行っていないときのものはスルー
+        return true;
+      }
+      return false;
+    }
+  }
+
+  static startSendReport() {
+    this.sending = true;
+  }
+
+  static stopSendReport() {
+    this.sending = false;
+  }
+
+  static isSending(): boolean {
+    return this.sending;
+  }
+
+  static isEmptyRequestedQueue(): boolean {
+    if (this.requestedQueue.length === 0) {
+      return true;
+    }
+    return false;
+  }
 }

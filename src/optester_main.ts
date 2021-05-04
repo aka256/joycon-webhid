@@ -1,4 +1,4 @@
-import { controlHID, getDeviceInfo, switchSimpleHIDInput, switchStandardInput, switchIMU, switchSimpleHIDInputMCU, switchMCUInput, switchMCUSuspend, switchMCUResume, getMCUState, switchNFCMode, switchIRMode, pollingToTarget, setPlayerLights, switchRumble, setRumble } from './event';
+import { controlHID, getDeviceInfo, switchSimpleHIDInput, switchStandardInput, switchIMU, switchSimpleHIDInputMCU, switchMCUInput, switchMCUSuspend, switchMCUResume, getMCUState, switchNFCMode, switchIRMode, pollingToTarget, setPlayerLights, switchRumble, setRumble, hexDumpFlashMemory } from './event';
 import { debugMode, toggleDebugMode } from './debug';
 
 document.addEventListener("DOMContentLoaded", function(){
@@ -33,4 +33,6 @@ document.addEventListener("DOMContentLoaded", function(){
       toggleDebugMode();
     }
   });
+  // SPI Flash memory
+  document.querySelector("#spi-test-btn")?.addEventListener("click", hexDumpFlashMemory);
 }, false);

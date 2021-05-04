@@ -1,5 +1,6 @@
 import { moveStickHat, pushButtunAnimation, releaseButtunAnimation } from "./animation";
 import { JoyConLProductId, JoyConRProductId, ProConProductId } from "./data";
+import { MemoryDumpManager } from "./helper";
 
 const ControllerType: {[name: number]: string} = { 1: "Joy-Con (L)", 2: "Joy-Con (R)", 3: "Pro Controller" };
 
@@ -333,4 +334,45 @@ export function parseNFCState(event: HIDInputReportEvent) {
     nfcTypeInput.value = "";
     nfcUidInput.value = "";
   }
+}
+
+let dumpData: Array<number> = [];
+for(let i = 0; i<0x10000; i++) {
+  dumpData.push(0x00);
+}
+
+/**
+ * SPI Falsh memory内のデータをdumpDataへ保存する。
+ * @param event Input report
+ */
+export function parseSPIFlashRead(event: HIDInputReportEvent) {
+  console.log("parse");
+  const {data, device, reportId} = event;
+
+  let f = MemoryDumpManager.receiveData(data);
+  console.log(f);
+  if(f === true) {
+    let headAddr = data.getUint16(14, true);
+    let length = data.getUint8(18);
+  
+    for(let i = 0; i<length; i++){
+      dumpData[i + headAddr] = data.getUint8(i+19);
+    }
+  }
+}
+
+export function displayDumpData() {
+  console.log("display");
+  let codeElement = <HTMLTextAreaElement>document.getElementById("dumpViewer");
+
+  let displayText = "\nOffset: 00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f\n";
+
+  for(let i = 0; i<Math.ceil(dumpData.length/16); i++) {
+    displayText += i.toString(16).padStart(5,'0') + "0: ";
+    for(let j = 0; j<16; j++) {
+      displayText += dumpData[16*i+j].toString(16).padStart(2, '0') + " ";
+    }
+    displayText += "\n";
+  }
+  codeElement.innerText = displayText;
 }

@@ -80,10 +80,9 @@
       <li class="nav-item">
         <a class="nav-link" id="nfc-ir-tab" data-toggle="tab" href="#nfc-ir-page" role="tab" aria-controls="nfc-ir-page" aria-selected="false">NFC/IR</a>
       </li>
-      <!--
       <li class="nav-item">
         <a class="nav-link" id="spi-tab" data-toggle="tab" href="#spi-page" role="tab" aria-controls="spi-page" aria-selected="false">SPI</a>
-      </li>-->
+      </li>
       <li class="nav-item">
         <a class="nav-link" id="setting-tab" data-toggle="tab" href="#setting-page" role="tab" aria-controls="setting-page" aria-selected="false">Setting</a>
       </li>
@@ -516,9 +515,12 @@
         </div>
       </div>
 
-      <!--
       <div class="tab-pane fade show" id="spi-page" role="tabpanel" aria-labelledby="spi-tab">
-      </div>-->
+        <pre class="bg-light rounded border border-dark" >
+          <code class="m-3" id="dumpViewer"></code>
+        </pre>
+        <button type="button" class="btn btn-primary col-12" id="spi-test-btn">Send</button>
+      </div>
 
       <div class="tab-pane fade show" id="setting-page" role="tabpanel" aria-labelledby="setting-tab">
         <div class="shadow-sm bg-light mt-5 ml-5 mr-5 p-3 rounded">

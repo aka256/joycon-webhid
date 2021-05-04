@@ -1,7 +1,7 @@
 import { writeOutputReport, writeOutputReport0x01Crc, writeOutputReport0x11Crc } from './output_report';
 import { NintendoVendorId, DefaultRumble, JoyConRProductId, ProConProductId } from './data';
-import { toHex, PacketManager, displayModal, encodeHighFreq, encodeHighAmpli,encodeLowFreq, encodeLowAmpli, arrayToHexString } from './helper';
-import { parseSimpleHIDInput, parseReplyDeviceInfo, parseStandardInput, parseMCUStateReport, parseNFCState } from './input_report';
+import { toHex, PacketManager, displayModal, encodeHighFreq, encodeHighAmpli,encodeLowFreq, encodeLowAmpli, arrayToHexString, MemoryDumpManager } from './helper';
+import { parseSimpleHIDInput, parseReplyDeviceInfo, parseStandardInput, parseMCUStateReport, parseNFCState, parseSPIFlashRead, displayDumpData } from './input_report';
 import { debugInfo } from './debug';
 
 let connectedDevice: HIDDevice;
@@ -81,6 +81,9 @@ export async function controlHID() {
           switch (replyId){
             case 0x02:
               parseReplyDeviceInfo(event);
+              break;
+            case 0x10:
+              parseSPIFlashRead(event);
               break;
             default:
               debugInfo("Unknown Reply", toHex(replyId));
@@ -420,4 +423,55 @@ export async function setRumble() {
     displayModal("not-connected-modal");
     console.log(e);
   }
+}
+
+/**
+ * Joy-Con内のフラッシュメモリのダンプを取る。
+ * @returns None
+ */
+export async function hexDumpFlashMemory() {
+  if(connectedDevice === undefined || connectedDevice.opened !== true){
+    displayModal("not-connected-modal");
+    return;
+  }
+
+  const DataMaxLength = 0x1d;
+  const ReadLengthLimit = 0x5000;
+  const UpperAddressLimit = 0x170000;
+  let readStartAddress = 0x2000;
+  let readLength = 0x5000;
+  
+  // MemoryDumpManagerを他が使用していなければ、通信を開始
+  if (MemoryDumpManager.isSending() === false){
+    // MemoryDumpManagerを使用中に変更
+    MemoryDumpManager.startSendReport();
+
+    // 通信を開始
+    for(let i = readStartAddress; i<readStartAddress+Math.min(readLength,ReadLengthLimit); i += DataMaxLength){
+      // MemoryDumpManagerに通信内容を通知
+      MemoryDumpManager.requestData(i, Math.min(DataMaxLength, UpperAddressLimit-(DataMaxLength+i), readStartAddress+readLength-i));
+      
+      writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x10, i%0x100, Math.floor(i/0x100), 0x00, 0x00, Math.min(DataMaxLength, UpperAddressLimit-(DataMaxLength+i), readStartAddress+readLength-i));
+      
+      // Replyが返ってくるまで待機
+      while (MemoryDumpManager.isEmptyRequestedQueue() === false) {
+        //10ms待機
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+    }
+    // MemoryDumpManagerを使用済に変更
+    MemoryDumpManager.stopSendReport();
+
+    // dump内容を表示
+    displayDumpData();
+  }
+}
+
+export async function requestFlashMemory(headAddr: number, length: number) {
+  if(connectedDevice.opened !== true){
+    displayModal("not-connected-modal");
+    return;
+  }
+
+  writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x10, headAddr%0x100, Math.floor(headAddr/0x100), 0x00, 0x00, length);
 }
