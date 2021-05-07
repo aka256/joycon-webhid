@@ -81,7 +81,10 @@
         <a class="nav-link" id="nfc-ir-tab" data-toggle="tab" href="#nfc-ir-page" role="tab" aria-controls="nfc-ir-page" aria-selected="false">NFC/IR</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" id="spi-tab" data-toggle="tab" href="#spi-page" role="tab" aria-controls="spi-page" aria-selected="false">SPI</a>
+        <a class="nav-link" id="spi-tab" data-toggle="tab" href="#spi-page" role="tab" aria-controls="spi-page" aria-selected="false">SPI Memory</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="dump-tab" data-toggle="tab" href="#dump-page" role="tab" aria-controls="dump-page" aria-selected="false">Hex Dump</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" id="setting-tab" data-toggle="tab" href="#setting-page" role="tab" aria-controls="setting-page" aria-selected="false">Setting</a>
@@ -515,7 +518,325 @@
         </div>
       </div>
 
-      <div class="tab-pane fade show" id="spi-page" role="tabpanel" aria-labelledby="spi-tab">
+      <!--SPI Flash Memory Tab-->
+      <div class="tab-pane fade show p-3" id="spi-page" role="tabpanel" aria-labelledby="spi-tab">
+        <h2>SPI Flash Memory</h2>
+        <p>Joy-Con内のSPI Flash MemoryにはBluetoothで用いられるペアリングのための情報や、キャリブレーションなどの情報が保存されている。以下では、それらの情報を表示させている。SPI Flash Memory内のすべてのデータを取得したい場合はHex Dumpを用いると良い。</p>
+        <h3>使い方</h3>
+        <ol>
+          <li>"Get all dataボタン"を押すだけ</li>
+        </ol>
+
+        <button type="button" class="btn btn-primary btn-block" id="spi-get-all-data-btn">Get all data</button>
+
+        <!--0x0000-->
+        <div class="shadow rounded-lg p-3 my-3">
+          <h2>Initial PatchRAM (0x0000)</h2>
+          <div class="px-3 pt-3">
+            <div class="form-group row align-items-center">
+              <div class="col-4">Loader Magic</div>
+              <input class="form-control form-control-sm col-8" type="text" placeholder="" readonly id="spi-0-magic">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-4">Bluetooth device address</div>
+              <input class="form-control form-control-sm col-8" type="text" placeholder="" readonly id="spi-0-bd-addr">
+            </div>
+          </div>
+        </div>
+
+        <!--0x1000-->
+        <div class="shadow rounded-lg p-3 my-3">
+          <h2>Failsafe machanism (0x1000)</h2>
+          <div class="px-3 pt-3">
+            <div class="form-group row align-items-center">
+              <div class="col-2">OTA Signature Magic</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-1-ota-magic">
+              <div class="col-2">Dynamic Section Offset2</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-1-dynamic-section">
+            </div>
+          </div>
+        </div>
+
+        <!--0x2000-->
+        <div class="shadow rounded-lg p-3 my-3">
+          <h2>Pairing infomation (0x2000)</h2>
+          <div class="px-3 pt-3">
+            <div class="form-group row">
+              <div class="col-4">Which section is used?</div>
+              <input class="form-control form-control-sm col-8" type="text" placeholder="" readonly id="spi-2-used">
+            </div>
+          </div>
+          <div class="px-3 pt-3">
+            <h3>Section 1</h3>
+            <div class="form-group row align-items-center">
+              <div class="col-2">Host Bluetooth address</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-2-sec1-addr">
+              <div class="col-2">Host capabilities</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-2-sec1-host">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-4">Bluetooth Long Term Key</div>
+              <input class="form-control form-control-sm col-8" type="text" placeholder="" readonly id="spi-2-sec1-ltk">
+            </div>
+          </div>
+          <div class="px-3 pt-3">
+            <h3>Section 2</h3>
+            <div class="form-group row align-items-center">
+              <div class="col-2">Host Bluetooth address</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-2-sec2-addr">
+              <div class="col-2">Host capabilities</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-2-sec2-host">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-4">Bluetooth Long Term Key</div>
+              <input class="form-control form-control-sm col-8" type="text" placeholder="" readonly id="spi-2-sec2-ltk">
+            </div>
+          </div>
+        </div>
+
+        <!--0x6000-->
+        <div class="shadow rounded-lg p-3 my-3">
+          <h2>Factory Configuration and Calibration (0x6000)</h2>
+          <div class="px-3 pt-3">
+            <div class="form-group row align-items-center">
+              <div class="col-4">Serial number</div>
+              <input class="form-control form-control-sm col-8" type="text" placeholder="" readonly id="spi-6-serial">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-4">Device type</div>
+              <input class="form-control form-control-sm col-8" type="text" placeholder="" readonly id="spi-6-device-type">
+            </div>
+          </div>
+          <div class="px-3 pt-3">
+            <h3>Accelerometer factory calibration</h3>
+            <div class="form-group row align-items-center">
+              <div class="col-2">X origin position</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-acc-x-origin">
+              <div class="col-2">Y origin position</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-acc-y-origin">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">Z origin position</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-acc-z-origin">
+              <div class="col-2">X sensitivity coefficient</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-acc-x-coeff">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">Y sensitivity coefficient</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-acc-y-coeff">
+              <div class="col-2">Z sensitivity coefficient</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-acc-z-coeff">
+            </div>
+          </div>
+          <div class="px-3 pt-3">
+            <h3>Gyroscope factory calibration</h3>
+            <div class="form-group row align-items-center">
+              <div class="col-2">X origin position</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-gyro-x-origin">
+              <div class="col-2">Y origin position</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-gyro-y-origin">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">Z origin position</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-gyro-z-origin">
+              <div class="col-2">X sensitivity coefficient</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-gyro-x-coeff">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">Y sensitivity coefficient</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-gyro-y-coeff">
+              <div class="col-2">Z sensitivity coefficient</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-gyro-z-coeff">
+            </div>
+          </div>
+          <div class="px-3 pt-3">
+            <h3>Left analog stick factory calibration</h3>
+            <div class="form-group row align-items-center">
+              <div class="col-2">X max above center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-stick-l-x-max">
+              <div class="col-2">Y max above center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-stick-l-y-max">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">X center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-stick-l-x-center">
+              <div class="col-2">Y center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-stick-l-y-center">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">X min below center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-stick-l-x-min">
+              <div class="col-2">Y min below center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-stick-l-y-min">
+            </div>
+          </div>
+          <div class="px-3 pt-3">
+            <h3>Right analog stick factory calibration</h3>
+            <div class="form-group row align-items-center">
+              <div class="col-2">X center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-stick-r-x-center">
+              <div class="col-2">Y center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-stick-r-y-center">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">X min below center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-stick-r-x-min">
+              <div class="col-2">Y min below center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-stick-r-y-min">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">X man above center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-stick-r-x-max">
+              <div class="col-2">Y max above center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-stick-r-y-max">
+            </div>
+          </div>
+          <div class="px-3 pt-3">
+            <h3>Controller color</h3>
+            <div class="form-group row align-items-center">
+              <div class="col-2">Body</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-color-body">
+              <div class="col-2">Buttons</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-color-buttons">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">Left grip</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-color-l-grip">
+              <div class="col-2">Right grip</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-color-r-grip">
+            </div>
+          </div>
+          <div class="px-3 pt-3">
+            <h3>6-Axis Horizontal offset</h3>
+            <div class="form-group row align-items-center">
+              <div class="col-2">X axis</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-horizontal-x">
+              <div class="col-2">Y axis</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-horizontal-y">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">Z axis</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-6-horizontal-z">
+            </div>
+          </div>
+          <div class="px-3 pt-3">
+            <h3>Stick parameters</h3>
+            <div class="form-group row align-items-center">
+              <div class="col-2">1</div>
+              <input class="form-control form-control-sm col-10" type="text" placeholder="" readonly id="spi-6-stick-1">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">2</div>
+              <input class="form-control form-control-sm col-10" type="text" placeholder="" readonly id="spi-6-stick-2">
+            </div>
+          </div>
+        </div>
+
+        <!--0x8000-->
+        <div class="shadow rounded-lg p-3 my-3">
+          <h2>User Calibration (0x8000)</h2>
+          <div class="px-3 pt-3">
+            <h3>Left analog stick user calibration</h3>
+            <div class="form-group row align-items-center">
+              <div class="col-4">Is user calibration being used?</div>
+              <input class="form-control form-control-sm col-8" type="text" placeholder="" readonly id="spi-8-stick-l-magic">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">X max above center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-stick-l-x-max">
+              <div class="col-2">Y max above center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-stick-l-y-max">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">X center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-stick-l-x-center">
+              <div class="col-2">Y center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-stick-l-y-center">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">X min below center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-stick-l-x-min">
+              <div class="col-2">Y min below center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-stick-l-y-min">
+            </div>
+          </div>
+          <div class="px-3 pt-3">
+            <h3>Right analog stick user calibration</h3>
+            <div class="form-group row align-items-center">
+              <div class="col-4">Is user calibration being used?</div>
+              <input class="form-control form-control-sm col-8" type="text" placeholder="" readonly id="spi-8-stick-r-magic">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">X center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-stick-r-x-center">
+              <div class="col-2">Y center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-stick-r-y-center">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">X min below center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-stick-r-x-min">
+              <div class="col-2">Y min below center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-stick-r-y-min">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">X man above center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-stick-r-x-max">
+              <div class="col-2">Y max above center</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-stick-r-y-max">
+            </div>
+          </div>
+          <div class="px-3 pt-3">
+            <h3>6Axis sensor user calibration</h3>
+            <div class="form-group row align-items-center">
+              <div class="col-4">Is user calibration being used?</div>
+              <input class="form-control form-control-sm col-8" type="text" placeholder="" readonly id="spi-8-6axis-magic">
+            </div>
+            <h4>Accelerometer user calibration</h4>
+            <div class="form-group row align-items-center">
+              <div class="col-2">X origin position</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-acc-x-origin">
+              <div class="col-2">Y origin position</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-acc-y-origin">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">Z origin position</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-acc-z-origin">
+              <div class="col-2">X sensitivity coefficient</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-acc-x-coeff">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">Y sensitivity coefficient</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-acc-y-coeff">
+              <div class="col-2">Z sensitivity coefficient</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-acc-z-coeff">
+            </div>
+          </div>
+          <div class="px-3 pt-3">
+            <h4>Gyroscope user calibration</h4>
+            <div class="form-group row align-items-center">
+              <div class="col-2">X origin position</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-gyro-x-origin">
+              <div class="col-2">Y origin position</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-gyro-y-origin">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">Z origin position</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-gyro-z-origin">
+              <div class="col-2">X sensitivity coefficient</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-gyro-x-coeff">
+            </div>
+            <div class="form-group row align-items-center">
+              <div class="col-2">Y sensitivity coefficient</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-gyro-y-coeff">
+              <div class="col-2">Z sensitivity coefficient</div>
+              <input class="form-control form-control-sm col-4" type="text" placeholder="" readonly id="spi-8-gyro-z-coeff">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!--Hex Dump Tab-->
+      <div class="tab-pane fade show" id="dump-page" role="tabpanel" aria-labelledby="dump-tab">
         <pre class="bg-light rounded border border-dark" >
           <code class="m-3" id="dumpViewer"></code>
         </pre>

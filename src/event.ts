@@ -1,7 +1,7 @@
 import { writeOutputReport, writeOutputReport0x01Crc, writeOutputReport0x11Crc } from './output_report';
 import { NintendoVendorId, DefaultRumble, JoyConRProductId, ProConProductId } from './data';
-import { toHex, PacketManager, displayModal, encodeHighFreq, encodeHighAmpli,encodeLowFreq, encodeLowAmpli, arrayToHexString, MemoryDumpManager } from './helper';
-import { parseSimpleHIDInput, parseReplyDeviceInfo, parseStandardInput, parseMCUStateReport, parseNFCState, parseSPIFlashRead, displayDumpData } from './input_report';
+import { toHex, PacketManager, displayModal, encodeHighFreq, encodeHighAmpli,encodeLowFreq, encodeLowAmpli, arrayToHexString, MemoryDumpManager, dataViewToArray } from './helper';
+import { parseSimpleHIDInput, parseReplyDeviceInfo, parseStandardInput, parseMCUStateReport, parseNFCState, parseSPIFlashRead, displayDumpData, displaySPIFlashMemoryPage } from './input_report';
 import { debugInfo } from './debug';
 
 let connectedDevice: HIDDevice;
@@ -425,6 +425,45 @@ export async function setRumble() {
   }
 }
 
+export async function getPartialSPIData() {
+  if(connectedDevice === undefined || connectedDevice.opened !== true){
+    displayModal("not-connected-modal");
+    return;
+  }
+
+  const ReadDataSet = [[0x0000,0x001b],[0x1ff4,0x2000],[0x2000,0x204b],[0x6000,0x60aa],[0x8010,0x8040]];
+  const DataMaxLength = 0x1d;
+
+  // MemoryDumpManagerを他が使用していなければ、通信を開始
+  if (MemoryDumpManager.isSending() === false){
+    // MemoryDumpManagerを使用中に変更
+    MemoryDumpManager.startSendReport();
+
+    // 通信を開始
+    for(let data of ReadDataSet) {
+      for(let head = data[0]; head<=data[1]; head += DataMaxLength) {
+        let len = Math.min(DataMaxLength, data[1] - head);
+
+        // MemoryDumpManagerに通信内容を通知
+        MemoryDumpManager.requestData(head,len);
+        
+        writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x10, head%0x100, Math.floor(head/0x100), 0x00, 0x00, len);
+        
+        // Replyが返ってくるまで待機
+        while (MemoryDumpManager.isEmptyRequestedQueue() === false) {
+          //10ms待機
+          await new Promise(resolve => setTimeout(resolve, 10));
+        }
+      }
+    }
+    // MemoryDumpManagerを使用済に変更
+    MemoryDumpManager.stopSendReport();
+
+    // dump内容を表示
+    displaySPIFlashMemoryPage();
+  }
+}
+
 /**
  * Joy-Con内のフラッシュメモリのダンプを取る。
  * @returns None
@@ -438,8 +477,8 @@ export async function hexDumpFlashMemory() {
   const DataMaxLength = 0x1d;
   const ReadLengthLimit = 0x5000;
   const UpperAddressLimit = 0x170000;
-  let readStartAddress = 0x2000;
-  let readLength = 0x5000;
+  let readStartAddress = 0x6000;
+  let readLength = 0x1000;
   
   // MemoryDumpManagerを他が使用していなければ、通信を開始
   if (MemoryDumpManager.isSending() === false){

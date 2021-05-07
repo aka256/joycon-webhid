@@ -17,12 +17,13 @@ export function toHex(n: number, m: number = 2): string {
 /**
  * DataViewをArrayに変換する。
  * @param data もととなるDataView
+ * @param head 先頭index
  * @param len DataViewの変換する長さ
  * @returns DataViewの変換後のArray
  */
-export function dataViewToArray(data: DataView, len: number = data.byteLength): Array<number> {
+export function dataViewToArray(data: DataView, head: number = 0, len: number = data.byteLength): Array<number> {
   let arr:Array<number> = [];
-  for(let i = 0;i<Math.min(data.byteLength, len);i++){
+  for(let i = head;i<Math.min(data.byteLength, len + head);i++){
     arr.push(data.getUint8(i));
   }
   return arr;
@@ -108,14 +109,11 @@ export class PacketManager{
 /**
  * Arrayを16進数の文字列に変換する
  * @param arr もととなるArray
+ * @param str 間に挟む文字列
  * @returns 16進数の文字列
  */
-export function arrayToHexString(arr: Array<number>): string {
-  let retval = "";
-  arr.forEach(element => {
-    retval += toHex(element)+", ";
-  });
-  return retval;
+export function arrayToHexString(arr: Array<number>, str: string = ","): string {
+  return arr.map(x => x.toString(16).padStart(2,"0")).join(str);
 }
 
 const CRCTABLE8 = [
@@ -298,4 +296,19 @@ export class MemoryDumpManager {
     }
     return false;
   }
+}
+
+export function arrayToAddress(arr: number[]): string {
+  let retval: string[] = [];
+  retval = arr.map(x => x.toString(16).padStart(2,"0"));
+  return retval.join(":");
+}
+
+export function byteToInt16(arr: number[]): number {
+  let retval = arr[0] * 0x100 + arr[1];
+  if ((arr[0] & 0x80) === 0x80) {
+    retval = -1 * (~(retval - 1) & 0xff);
+  }
+
+  return retval;
 }

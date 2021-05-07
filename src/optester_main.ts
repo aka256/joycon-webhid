@@ -1,5 +1,9 @@
-import { controlHID, getDeviceInfo, switchSimpleHIDInput, switchStandardInput, switchIMU, switchSimpleHIDInputMCU, switchMCUInput, switchMCUSuspend, switchMCUResume, getMCUState, switchNFCMode, switchIRMode, pollingToTarget, setPlayerLights, switchRumble, setRumble, hexDumpFlashMemory } from './event';
+import { controlHID, getDeviceInfo, switchSimpleHIDInput, switchStandardInput, switchIMU, switchSimpleHIDInputMCU, switchMCUInput, switchMCUSuspend, switchMCUResume, getMCUState, switchNFCMode, switchIRMode, pollingToTarget, setPlayerLights, switchRumble, setRumble, hexDumpFlashMemory, getPartialSPIData } from './event';
 import { debugMode, toggleDebugMode } from './debug';
+import { initDumpData } from './input_report';
+
+// dumpDataの初期化
+initDumpData();
 
 document.addEventListener("DOMContentLoaded", function(){
   // Home
@@ -27,12 +31,16 @@ document.addEventListener("DOMContentLoaded", function(){
   document.querySelector("#nfc-mode-btn")?.addEventListener("click", switchNFCMode);
   document.querySelector("#ir-mode-btn")?.addEventListener("click", switchIRMode);
   document.querySelector("#mcu-nfc-polling-btn")?.addEventListener("click", pollingToTarget);
+  // SPI Flash Memory
+  document.querySelector("#spi-get-all-data-btn")?.addEventListener("click", getPartialSPIData);
+  // Hex Dump
+  document.querySelector("#spi-test-btn")?.addEventListener("click", hexDumpFlashMemory);
+  // Setting
   document.querySelector("#display-debug-btn")?.addEventListener("click", function(){
     let element = <HTMLInputElement>document.getElementById("display-debug-btn");
     if ( element.checked != debugMode ) {
       toggleDebugMode();
     }
   });
-  // SPI Flash memory
-  document.querySelector("#spi-test-btn")?.addEventListener("click", hexDumpFlashMemory);
+  
 }, false);

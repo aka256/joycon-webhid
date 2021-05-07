@@ -1,6 +1,6 @@
 import { moveStickHat, pushButtunAnimation, releaseButtunAnimation } from "./animation";
 import { JoyConLProductId, JoyConRProductId, ProConProductId } from "./data";
-import { MemoryDumpManager } from "./helper";
+import { arrayToAddress, arrayToHexString, byteToInt16, dataViewToArray, MemoryDumpManager } from "./helper";
 
 const ControllerType: {[name: number]: string} = { 1: "Joy-Con (L)", 2: "Joy-Con (R)", 3: "Pro Controller" };
 
@@ -23,15 +23,9 @@ export function parseReplyDeviceInfo(event: HIDInputReportEvent){
   // ControllerType
   controllerTypeInput.value = ControllerType[data.getUint8(16)];
   // bt MAC address
-  macAddressInput.value = "";
-  for(let i = 17; i<23; i++){
-    macAddressInput.value += data.getUint8(i).toString(16).padStart(2, "0");
-    if (i !== 22){
-      macAddressInput.value += ":";
-    }
-  }
+  macAddressInput.value = arrayToAddress(dataViewToArray(data,18,6));
   // color
-  if (data.getUint8(24) === 1){
+  if (data.getUint8(25) === 1){
     colorInput.value = "In SPI";
   } else {
     colorInput.value = "Default";
@@ -337,8 +331,10 @@ export function parseNFCState(event: HIDInputReportEvent) {
 }
 
 let dumpData: Array<number> = [];
-for(let i = 0; i<0x10000; i++) {
-  dumpData.push(0x00);
+export function initDumpData(){
+  for(let i = 0; i<0x11000; i++) {
+    dumpData.push(0x00);
+  }
 }
 
 /**
@@ -346,7 +342,6 @@ for(let i = 0; i<0x10000; i++) {
  * @param event Input report
  */
 export function parseSPIFlashRead(event: HIDInputReportEvent) {
-  console.log("parse");
   const {data, device, reportId} = event;
 
   let f = MemoryDumpManager.receiveData(data);
@@ -359,6 +354,226 @@ export function parseSPIFlashRead(event: HIDInputReportEvent) {
       dumpData[i + headAddr] = data.getUint8(i+19);
     }
   }
+}
+
+export function displaySPIFlashMemoryPage() {
+  // 0x0000
+  let spi0LoaderMagic = <HTMLInputElement>document.getElementById("spi-0-magic");
+  let spi0BDADDR = <HTMLInputElement>document.getElementById("spi-0-bd-addr");
+
+  spi0LoaderMagic.value = arrayToHexString(dumpData.slice(0x0000,0x0011)," ");
+  spi0BDADDR.value = arrayToHexString(dumpData.slice(0x0015,0x001b)) + " (" + arrayToAddress(dumpData.slice(0x0015,0x001b).reverse()) + ")";
+
+  // 0x1000
+  let spi1OTAMagic = <HTMLInputElement>document.getElementById("spi-1-ota-magic");
+  let spi1DynamicSection = <HTMLInputElement>document.getElementById("spi-1-dynamic-section");
+
+  spi1OTAMagic.value = arrayToHexString(dumpData.slice(0x1ff4,0x1ffc)," ");
+  spi1DynamicSection.value = arrayToHexString(dumpData.slice(0x1ffc,0x2000)," ");
+
+  // 0x2000
+  let spi2Used = <HTMLInputElement>document.getElementById("spi-2-used");
+  let spi2Sec1Addr = <HTMLInputElement>document.getElementById("spi-2-sec1-addr");
+  let spi2Sec1LTK = <HTMLInputElement>document.getElementById("spi-2-sec1-ltk");
+  let spi2Sec1Host = <HTMLInputElement>document.getElementById("spi-2-sec1-host");
+  let spi2Sec2Addr = <HTMLInputElement>document.getElementById("spi-2-sec2-addr");
+  let spi2Sec2LTK = <HTMLInputElement>document.getElementById("spi-2-sec2-ltk");
+  let spi2Sec2Host = <HTMLInputElement>document.getElementById("spi-2-sec2-host");
+
+  spi2Used.value = arrayToHexString(dumpData.slice(0x2000,0x2001),"");
+  if (dumpData[0x2000] === 0x95) {
+    spi2Used.value += " (Section 1)";
+  } else if (dumpData[0x2000] === 0x00) {
+    spi2Used.value += " (Section 2)";
+  }
+  spi2Sec1Addr.value = arrayToHexString(dumpData.slice(0x2004,0x400a)) + " (" + arrayToAddress(dumpData.slice(0x2004,0x200a)) + ")";
+  spi2Sec1LTK.value = arrayToHexString(dumpData.slice(0x200a,0x201a).reverse()," ");
+  spi2Sec1Host.value = arrayToHexString(dumpData.slice(0x2024,0x2025),"");
+  if (dumpData[0x2024] === 0x68) {
+    spi2Sec1Host.value += " (Switch)";
+  } else if (dumpData[0x2024] === 0x08) {
+    spi2Sec1Host.value += " (PC)";
+  }
+  spi2Sec2Addr.value = arrayToHexString(dumpData.slice(0x202a,0x2030)) + " (" + arrayToAddress(dumpData.slice(0x202a,0x2030)) + ")";
+  spi2Sec2LTK.value = arrayToHexString(dumpData.slice(0x2030,0x2040).reverse()," ");
+  spi2Sec2Host.value = arrayToHexString(dumpData.slice(0x204a,0x204b),"");
+  if (dumpData[0x204a] === 0x68) {
+    spi2Sec2Host.value += " (Switch)";
+  } else if (dumpData[0x204a] === 0x08) {
+    spi2Sec2Host.value += " (PC)";
+  }
+
+  // 0x6000
+  let spi6Serial = <HTMLInputElement>document.getElementById("spi-6-serial");
+  let spi6DeviceType = <HTMLInputElement>document.getElementById("spi-6-device-type");
+  let spi6AccXOrigin = <HTMLInputElement>document.getElementById("spi-6-acc-x-origin");
+  let spi6AccYOrigin = <HTMLInputElement>document.getElementById("spi-6-acc-y-origin");
+  let spi6AccZOrigin = <HTMLInputElement>document.getElementById("spi-6-acc-z-origin");
+  let spi6AccXCoeff = <HTMLInputElement>document.getElementById("spi-6-acc-x-coeff");
+  let spi6AccYCoeff = <HTMLInputElement>document.getElementById("spi-6-acc-y-coeff");
+  let spi6AccZCoeff = <HTMLInputElement>document.getElementById("spi-6-acc-z-coeff");
+  let spi6GyroXOrigin = <HTMLInputElement>document.getElementById("spi-6-gyro-x-origin");
+  let spi6GyroYOrigin = <HTMLInputElement>document.getElementById("spi-6-gyro-y-origin");
+  let spi6GyroZOrigin = <HTMLInputElement>document.getElementById("spi-6-gyro-z-origin");
+  let spi6GyroXCoeff = <HTMLInputElement>document.getElementById("spi-6-gyro-x-coeff");
+  let spi6GyroYCoeff = <HTMLInputElement>document.getElementById("spi-6-gyro-y-coeff");
+  let spi6GyroZCoeff = <HTMLInputElement>document.getElementById("spi-6-gyro-z-coeff");
+  let spi6StickLXMax = <HTMLInputElement>document.getElementById("spi-6-stick-l-x-max");
+  let spi6StickLYMax = <HTMLInputElement>document.getElementById("spi-6-stick-l-y-max");
+  let spi6StickLXCenter = <HTMLInputElement>document.getElementById("spi-6-stick-l-x-center");
+  let spi6StickLYCenter = <HTMLInputElement>document.getElementById("spi-6-stick-l-y-center");
+  let spi6StickLXMin = <HTMLInputElement>document.getElementById("spi-6-stick-l-x-min");
+  let spi6StickLYMin = <HTMLInputElement>document.getElementById("spi-6-stick-l-y-min");
+  let spi6StickRXMax = <HTMLInputElement>document.getElementById("spi-6-stick-r-x-max");
+  let spi6StickRYMax = <HTMLInputElement>document.getElementById("spi-6-stick-r-y-max");
+  let spi6StickRXCenter = <HTMLInputElement>document.getElementById("spi-6-stick-r-x-center");
+  let spi6StickRYCenter = <HTMLInputElement>document.getElementById("spi-6-stick-r-y-center");
+  let spi6StickRXMin = <HTMLInputElement>document.getElementById("spi-6-stick-r-x-min");
+  let spi6StickRYMin = <HTMLInputElement>document.getElementById("spi-6-stick-r-y-min");
+  let spi6ColorBody = <HTMLInputElement>document.getElementById("spi-6-color-body");
+  let spi6ColorButtons = <HTMLInputElement>document.getElementById("spi-6-color-buttons");
+  let spi6ColorLGrip = <HTMLInputElement>document.getElementById("spi-6-color-l-grip");
+  let spi6ColorRGrip = <HTMLInputElement>document.getElementById("spi-6-color-r-grip");
+  let spi6HOffsetX = <HTMLInputElement>document.getElementById("spi-6-horizontal-x");
+  let spi6HOffsetY = <HTMLInputElement>document.getElementById("spi-6-horizontal-y");
+  let spi6HOffsetZ = <HTMLInputElement>document.getElementById("spi-6-horizontal-z");
+  let spi6StickParam1 = <HTMLInputElement>document.getElementById("spi-6-stick-1");
+  let spi6StickParam2 = <HTMLInputElement>document.getElementById("spi-6-stick-2");
+
+  spi6Serial.value = arrayToHexString(dumpData.slice(0x6000,0x6010)," ") + " ";
+  if (dumpData[0x6000] >= 0x80) {
+    spi6Serial.value += "(S/N don't exist)";
+  } else {
+    spi6Serial.value += "(";
+    for(let i of dumpData.slice(0x6000,0x6010)) {
+      if(i !== 0x00){
+        spi6Serial.value += String.fromCharCode(i);
+      }
+    }
+    spi6Serial.value += ")";
+  }
+  spi6DeviceType.value = dumpData[0x6012].toString(16).padStart(2,"0");
+  if (dumpData[0x6012] === 0x01) {
+    spi6DeviceType.value += " (Joy-Con L)"
+  } else if (dumpData[0x6012] === 0x02) {
+    spi6DeviceType.value += " (Joy-Con R)"
+  } else if (dumpData[0x6012] === 0x03) {
+    spi6DeviceType.value += " (Pro Controller)"
+  }
+
+  spi6AccXOrigin.value = arrayToHexString(dumpData.slice(0x6020,0x6022).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x6020,0x6022).reverse()).toString() + ")";
+  spi6AccYOrigin.value = arrayToHexString(dumpData.slice(0x6022,0x6024).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x6022,0x6024).reverse()).toString() + ")";
+  spi6AccZOrigin.value = arrayToHexString(dumpData.slice(0x6024,0x6026).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x6024,0x6026).reverse()).toString() + ")";
+  spi6AccXCoeff.value = arrayToHexString(dumpData.slice(0x6026,0x6028).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x6026,0x6028).reverse()).toString() + ")";
+  spi6AccYCoeff.value = arrayToHexString(dumpData.slice(0x6028,0x602a).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x6028,0x602a).reverse()).toString() + ")";
+  spi6AccZCoeff.value = arrayToHexString(dumpData.slice(0x602a,0x602c).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x602a,0x602c).reverse()).toString() + ")";
+  spi6GyroXOrigin.value = arrayToHexString(dumpData.slice(0x602c,0x602e).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x602c,0x602e).reverse()).toString() + ")";
+  spi6GyroYOrigin.value = arrayToHexString(dumpData.slice(0x602e,0x6030).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x602e,0x6030).reverse()).toString() + ")";
+  spi6GyroZOrigin.value = arrayToHexString(dumpData.slice(0x6030,0x6032).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x6030,0x6032).reverse()).toString() + ")";
+  spi6GyroXCoeff.value = arrayToHexString(dumpData.slice(0x6032,0x6034).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x6032,0x6034).reverse()).toString() + ")";
+  spi6GyroYCoeff.value = arrayToHexString(dumpData.slice(0x6034,0x6036).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x6034,0x6036).reverse()).toString() + ")";
+  spi6GyroZCoeff.value = arrayToHexString(dumpData.slice(0x6036,0x6038).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x6036,0x6038).reverse()).toString() + ")";
+
+  let spi6StickLData = convertTostickData(dumpData.slice(0x603d,0x6046));
+  spi6StickLXMax.value = spi6StickLData[0].toString(16).padStart(3,"0") + " (" + spi6StickLData[0].toString() + ")";
+  spi6StickLYMax.value = spi6StickLData[1].toString(16).padStart(3,"0") + " (" + spi6StickLData[1].toString() + ")";
+  spi6StickLXCenter.value = spi6StickLData[2].toString(16).padStart(3,"0") + " (" + spi6StickLData[2].toString() + ")";
+  spi6StickLYCenter.value = spi6StickLData[3].toString(16).padStart(3,"0") + " (" + spi6StickLData[3].toString() + ")";
+  spi6StickLXMin.value = spi6StickLData[4].toString(16).padStart(3,"0") + " (" + spi6StickLData[4].toString() + ")";
+  spi6StickLYMin.value = spi6StickLData[5].toString(16).padStart(3,"0") + " (" + spi6StickLData[5].toString() + ")";
+  let spi6StickRData = convertTostickData(dumpData.slice(0x6046,0x604f));
+  spi6StickRXCenter.value = spi6StickRData[0].toString(16).padStart(3,"0") + " (" + spi6StickRData[0].toString() + ")";
+  spi6StickRYCenter.value = spi6StickRData[1].toString(16).padStart(3,"0") + " (" + spi6StickRData[1].toString() + ")";
+  spi6StickRXMin.value = spi6StickRData[2].toString(16).padStart(3,"0") + " (" + spi6StickRData[2].toString() + ")";
+  spi6StickRYMin.value = spi6StickRData[3].toString(16).padStart(3,"0") + " (" + spi6StickRData[3].toString() + ")";
+  spi6StickRXMax.value = spi6StickRData[4].toString(16).padStart(3,"0") + " (" + spi6StickRData[4].toString() + ")";
+  spi6StickRYMax.value = spi6StickRData[5].toString(16).padStart(3,"0") + " (" + spi6StickRData[5].toString() + ")";
+
+  spi6ColorBody.value = arrayToHexString(dumpData.slice(0x6050,0x6053),"")
+  spi6ColorButtons.value = arrayToHexString(dumpData.slice(0x6053,0x6056),"")
+  spi6ColorLGrip.value = arrayToHexString(dumpData.slice(0x6056,0x6059),"")
+  spi6ColorRGrip.value = arrayToHexString(dumpData.slice(0x6059,0x605c),"")
+
+  spi6HOffsetX.value = arrayToHexString(dumpData.slice(0x6080,0x6082).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x6080,0x6082).reverse()).toString() + ")";
+  spi6HOffsetY.value = arrayToHexString(dumpData.slice(0x6082,0x6084).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x6082,0x6084).reverse()).toString() + ")";
+  spi6HOffsetZ.value = arrayToHexString(dumpData.slice(0x6084,0x6086).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x6084,0x6086).reverse()).toString() + ")";
+
+  spi6StickParam1.value = arrayToHexString(dumpData.slice(0x6086,0x6098)," ");
+  spi6StickParam2.value = arrayToHexString(dumpData.slice(0x6098,0x60aa)," ");
+
+  // 0x8000
+  let spi8StickLMagic = <HTMLInputElement>document.getElementById("spi-8-stick-l-magic");
+  let spi8StickLXMax = <HTMLInputElement>document.getElementById("spi-8-stick-l-x-max");
+  let spi8StickLYMax = <HTMLInputElement>document.getElementById("spi-8-stick-l-y-max");
+  let spi8StickLXCenter = <HTMLInputElement>document.getElementById("spi-8-stick-l-x-center");
+  let spi8StickLYCenter = <HTMLInputElement>document.getElementById("spi-8-stick-l-y-center");
+  let spi8StickLXMin = <HTMLInputElement>document.getElementById("spi-8-stick-l-x-min");
+  let spi8StickLYMin = <HTMLInputElement>document.getElementById("spi-8-stick-l-y-min");
+  let spi8StickRMagic = <HTMLInputElement>document.getElementById("spi-8-stick-r-magic");
+  let spi8StickRXMax = <HTMLInputElement>document.getElementById("spi-8-stick-r-x-max");
+  let spi8StickRYMax = <HTMLInputElement>document.getElementById("spi-8-stick-r-y-max");
+  let spi8StickRXCenter = <HTMLInputElement>document.getElementById("spi-8-stick-r-x-center");
+  let spi8StickRYCenter = <HTMLInputElement>document.getElementById("spi-8-stick-r-y-center");
+  let spi8StickRXMin = <HTMLInputElement>document.getElementById("spi-8-stick-r-x-min");
+  let spi8StickRYMin = <HTMLInputElement>document.getElementById("spi-8-stick-r-y-min");
+  let spi86AxisMagic = <HTMLInputElement>document.getElementById("spi-8-6axis-magic");
+  let spi8AccXOrigin = <HTMLInputElement>document.getElementById("spi-8-acc-x-origin");
+  let spi8AccYOrigin = <HTMLInputElement>document.getElementById("spi-8-acc-y-origin");
+  let spi8AccZOrigin = <HTMLInputElement>document.getElementById("spi-8-acc-z-origin");
+  let spi8AccXCoeff = <HTMLInputElement>document.getElementById("spi-8-acc-x-coeff");
+  let spi8AccYCoeff = <HTMLInputElement>document.getElementById("spi-8-acc-y-coeff");
+  let spi8AccZCoeff = <HTMLInputElement>document.getElementById("spi-8-acc-z-coeff");
+  let spi8GyroXOrigin = <HTMLInputElement>document.getElementById("spi-8-gyro-x-origin");
+  let spi8GyroYOrigin = <HTMLInputElement>document.getElementById("spi-8-gyro-y-origin");
+  let spi8GyroZOrigin = <HTMLInputElement>document.getElementById("spi-8-gyro-z-origin");
+  let spi8GyroXCoeff = <HTMLInputElement>document.getElementById("spi-8-gyro-x-coeff");
+  let spi8GyroYCoeff = <HTMLInputElement>document.getElementById("spi-8-gyro-y-coeff");
+  let spi8GyroZCoeff = <HTMLInputElement>document.getElementById("spi-8-gyro-z-coeff");
+
+  spi8StickLMagic.value = arrayToHexString(dumpData.slice(0x8010,0x8012)," ") + " " + (dumpData[0x8010] === 0xb2 && dumpData[0x8011] === 0xa1 ? "(Yes)": "(No)");
+  let spi8StickLData = convertTostickData(dumpData.slice(0x8012,0x801b));
+  spi8StickLXMax.value = spi8StickLData[0].toString(16).padStart(3,"0") + " (" + spi8StickLData[0].toString() + ")";
+  spi8StickLYMax.value = spi8StickLData[1].toString(16).padStart(3,"0") + " (" + spi8StickLData[1].toString() + ")";
+  spi8StickLXCenter.value = spi8StickLData[2].toString(16).padStart(3,"0") + " (" + spi8StickLData[2].toString() + ")";
+  spi8StickLYCenter.value = spi8StickLData[3].toString(16).padStart(3,"0") + " (" + spi8StickLData[3].toString() + ")";
+  spi8StickLXMin.value = spi8StickLData[4].toString(16).padStart(3,"0") + " (" + spi8StickLData[4].toString() + ")";
+  spi8StickLYMin.value = spi8StickLData[5].toString(16).padStart(3,"0") + " (" + spi8StickLData[5].toString() + ")";
+  spi8StickRMagic.value = arrayToHexString(dumpData.slice(0x801b,0x801d)," ") + " " + (dumpData[0x801b] === 0xb2 && dumpData[0x801c] === 0xa1 ? "(Yes)": "(No)");
+  let spi8StickRData = convertTostickData(dumpData.slice(0x801d,0x8026));
+  spi8StickRXCenter.value = spi8StickRData[0].toString(16).padStart(3,"0") + " (" + spi8StickRData[0].toString() + ")";
+  spi8StickRYCenter.value = spi8StickRData[1].toString(16).padStart(3,"0") + " (" + spi8StickRData[1].toString() + ")";
+  spi8StickRXMin.value = spi8StickRData[2].toString(16).padStart(3,"0") + " (" + spi8StickRData[2].toString() + ")";
+  spi8StickRYMin.value = spi8StickRData[3].toString(16).padStart(3,"0") + " (" + spi8StickRData[3].toString() + ")";
+  spi8StickRXMax.value = spi8StickRData[4].toString(16).padStart(3,"0") + " (" + spi8StickRData[4].toString() + ")";
+  spi8StickRYMax.value = spi8StickRData[5].toString(16).padStart(3,"0") + " (" + spi8StickRData[5].toString() + ")";
+
+  spi86AxisMagic.value = arrayToHexString(dumpData.slice(0x8026,0x8028)," ") + " " + (dumpData[0x8026] === 0xb2 && dumpData[0x8027] === 0xa1 ? "(Yes)": "(No)");
+  spi8AccXOrigin.value = arrayToHexString(dumpData.slice(0x8028,0x802a).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x8028,0x802a).reverse()).toString() + ")";
+  spi8AccYOrigin.value = arrayToHexString(dumpData.slice(0x802a,0x802c).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x802a,0x802c).reverse()).toString() + ")";
+  spi8AccZOrigin.value = arrayToHexString(dumpData.slice(0x802c,0x802e).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x802c,0x802e).reverse()).toString() + ")";
+  spi8AccXCoeff.value = arrayToHexString(dumpData.slice(0x802e,0x8030).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x802e,0x8030).reverse()).toString() + ")";
+  spi8AccYCoeff.value = arrayToHexString(dumpData.slice(0x8030,0x8032).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x8030,0x8032).reverse()).toString() + ")";
+  spi8AccZCoeff.value = arrayToHexString(dumpData.slice(0x8032,0x8034).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x8032,0x8034).reverse()).toString() + ")";
+  spi8GyroXOrigin.value = arrayToHexString(dumpData.slice(0x8034,0x8036).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x8034,0x8036).reverse()).toString() + ")";
+  spi8GyroYOrigin.value = arrayToHexString(dumpData.slice(0x8036,0x8038).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x8036,0x8038).reverse()).toString() + ")";
+  spi8GyroZOrigin.value = arrayToHexString(dumpData.slice(0x8038,0x803a).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x8038,0x803a).reverse()).toString() + ")";
+  spi8GyroXCoeff.value = arrayToHexString(dumpData.slice(0x803a,0x803c).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x803a,0x803c).reverse()).toString() + ")";
+  spi8GyroYCoeff.value = arrayToHexString(dumpData.slice(0x803c,0x803e).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x803c,0x803e).reverse()).toString() + ")";
+  spi8GyroZCoeff.value = arrayToHexString(dumpData.slice(0x803e,0x8040).reverse(),"") + " (" + byteToInt16(dumpData.slice(0x803e,0x8040).reverse()).toString() + ")";
+}
+
+function convertTostickData(arr: number[]) {
+  if (arr.length !== 9) {
+    return [0,0,0,0,0,0];
+  }
+  let retval = [];
+  retval.push((arr[1] << 8) & 0xf00 | arr[0]);
+  retval.push((arr[2] << 4) | (arr[1] >> 4));
+  retval.push((arr[4] << 8) & 0xf00 | arr[3]);
+  retval.push((arr[5] << 4) | (arr[4] >> 4));
+  retval.push((arr[7] << 8) & 0xf00 | arr[6]);
+  retval.push((arr[8] << 4) | (arr[7] >> 4));
+  return retval;
 }
 
 export function displayDumpData() {
