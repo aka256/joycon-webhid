@@ -1,6 +1,6 @@
 import { controlHID, getDeviceInfo, switchSimpleHIDInput, switchStandardInput, switchIMU, switchSimpleHIDInputMCU, switchMCUInput, switchMCUSuspend, switchMCUResume, getMCUState, switchNFCMode, switchIRMode, pollingToTarget, setPlayerLights, switchRumble, setRumble, hexDumpFlashMemory, getPartialSPIData } from './event';
 import { debugMode, toggleDebugMode } from './debug';
-import { initDumpData } from './input_report';
+import { displayDumpData, initDumpData } from './input_report';
 
 // dumpDataの初期化
 initDumpData();
@@ -34,7 +34,8 @@ document.addEventListener("DOMContentLoaded", function(){
   // SPI Flash Memory
   document.querySelector("#spi-get-all-data-btn")?.addEventListener("click", getPartialSPIData);
   // Hex Dump
-  document.querySelector("#spi-test-btn")?.addEventListener("click", hexDumpFlashMemory);
+  document.querySelector("#hexdump-send-btn")?.addEventListener("click", hexDumpFlashMemory);
+  document.querySelector("#hexdump-reload-btn")?.addEventListener("click", displayDumpData);
   // Setting
   document.querySelector("#display-debug-btn")?.addEventListener("click", function(){
     let element = <HTMLInputElement>document.getElementById("display-debug-btn");

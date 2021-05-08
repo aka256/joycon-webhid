@@ -252,7 +252,7 @@ export class MemoryDumpManager {
   static receiveData(data: DataView): boolean {
     console.log(arrayToHexString(dataViewToArray(data)));
     if (data.getUint8(12) === 0x90) {  //ACK
-      if (this.requestedQueue[0][0] === data.getUint16(14,true) && this.requestedQueue[0][1] === data.getUint8(18)) {
+      if (this.requestedQueue[0][0] === data.getUint32(14,true) && this.requestedQueue[0][1] === data.getUint8(18)) {
         this.requestedQueue.splice(0,1);
         return true;
       }
@@ -264,7 +264,7 @@ export class MemoryDumpManager {
       }
 
       //再送処理
-      requestFlashMemory(data.getUint16(14), data.getUint8(18));
+      requestFlashMemory(this.requestedQueue[0][0], this.requestedQueue[0][1]);
       this.resendingCount++;
       console.log("resending");
 

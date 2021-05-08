@@ -836,11 +836,92 @@
       </div>
 
       <!--Hex Dump Tab-->
-      <div class="tab-pane fade show" id="dump-page" role="tabpanel" aria-labelledby="dump-tab">
-        <pre class="bg-light rounded border border-dark" >
-          <code class="m-3" id="dumpViewer"></code>
-        </pre>
-        <button type="button" class="btn btn-primary col-12" id="spi-test-btn">Send</button>
+      <div class="tab-pane fade show p-3" id="dump-page" role="tabpanel" aria-labelledby="dump-tab">
+        <h2>SPI Flash Memory Hex Dump</h2>
+        <p>
+          SPI Flash Memory内の一部のHex dumpを取得する。
+        </p>
+        <h3>使い方</h3>
+        <ol>
+          <li>Head addressに読み込みたいデータの先頭のアドレスを、Lengthには読み込みたいデータの長さを入力する。</li>
+          <li>Sendボタンを押して、数秒待つ(Lengthを0x4000とした場合、40秒ほど)とResultにSPI Flash MemoryのHex dumpが表示される。</li>
+          <li>なお、Lengthは最大0x4000(16384)まで読み込める。</li>
+        </ol>
+        <div class="shadow rounded-lg p-3 my-3">
+          <h3>Hex dump</h3>
+          <div class="px-3 pt-3">
+            <div class="form-group row">
+              <label class="col-2" for="hexdump-head-addr">Head address</label>
+              <div class="col-10 input-group">
+                <input type="text" class="form-control" id="hexdump-head-addr" placeholder="0x00000 ~ 0x7ffff">
+                <div class="input-group-append">
+                  <span class="input-group-text">Use Hex</span>
+                  <div class="input-group-text">
+                    <input type="checkbox" id="hexdump-head-addr-use-hex-checkbox" checked>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-2" for="hexdump-length">Length</label>
+              <div class="col-10 input-group">
+                <input type="text" class="form-control" id="hexdump-length" placeholder="0x0000 ~ 0x4000">
+                <div class="input-group-append">
+                  <span class="input-group-text">Use Hex</span>
+                  <div class="input-group-text">
+                    <input type="checkbox" id="hexdump-length-use-hex-checkbox" checked>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="offset-2 col-2">
+                <button type="button" class="btn btn-primary btn-block" id="hexdump-send-btn">Send</button>
+              </div>
+              <div class="col-1" style="visibility: hidden;" id="hexdump-send-btn-spinner">
+                <div class="spinner-border" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="shadow rounded-lg p-3 my-3">
+          <h3>Settings</h3>
+          <div class="px-3 pt-3">
+            <div class="row">
+              <div class="col-6">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="hexdump-display-col-byte" id="hexdump-16byte-radio" checked>
+                  <label class="form-check-label" for="hexdump-16byte-radio">16byteずつ表示する</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="hexdump-display-col-byte" id="hexdump-32byte-radio">
+                  <label class="form-check-label" for="hexdump-32byte-radio">32byteずつ表示する</label>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="hexdump-ascii-checkbox" checked>
+                  <label class="form-check-label" for="hexdump-ascii-checkbox">ASCII文字を表示する</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="hexdump-offset-checkbox" checked>
+                  <label class="form-check-label" for="hexdump-offset-checkbox">Offsetを表示する</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row mt-3">
+              <div class="col-2">
+                <button type="button" class="btn btn-primary btn-block" id="hexdump-reload-btn">Reload</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="shadow rounded-lg p-3 my-3">
+          <h3>Result</h3>
+          <pre class="bg-light rounded border border-dark my-3 px-3 pb-3"><code class="m-3" id="dumpViewer"></code></pre>
+        </div>
       </div>
 
       <div class="tab-pane fade show" id="setting-page" role="tabpanel" aria-labelledby="setting-tab">
@@ -883,6 +964,70 @@
         </div>
         <div class="modal-body">
           This device can not send MCU command. Please use Joy-Con (R) or Pro Controller.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="not-hex-modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Error</h5>
+        </div>
+        <div class="modal-body">
+          Please enter a hexadecimal number.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="not-number-modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Error</h5>
+        </div>
+        <div class="modal-body">
+          Please enter a number.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="hexdump-over-head-addr-modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Error</h5>
+        </div>
+        <div class="modal-body">
+          Please enter a number between 0x00000 to 0x7ffff to "Head address" textbox.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="hexdump-over-length-modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Error</h5>
+        </div>
+        <div class="modal-body">
+          Please enter a number between 0x00000 to 0x04000 to "Length" textbox.
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

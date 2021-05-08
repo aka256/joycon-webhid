@@ -1,5 +1,6 @@
 import { moveStickHat, pushButtunAnimation, releaseButtunAnimation } from "./animation";
 import { JoyConLProductId, JoyConRProductId, ProConProductId } from "./data";
+import { debugInfo } from "./debug";
 import { arrayToAddress, arrayToHexString, byteToInt16, dataViewToArray, MemoryDumpManager } from "./helper";
 
 const ControllerType: {[name: number]: string} = { 1: "Joy-Con (L)", 2: "Joy-Con (R)", 3: "Pro Controller" };
@@ -332,7 +333,7 @@ export function parseNFCState(event: HIDInputReportEvent) {
 
 let dumpData: Array<number> = [];
 export function initDumpData(){
-  for(let i = 0; i<0x11000; i++) {
+  for(let i = 0; i<0x80000; i++) {
     dumpData.push(0x00);
   }
 }
@@ -342,12 +343,12 @@ export function initDumpData(){
  * @param event Input report
  */
 export function parseSPIFlashRead(event: HIDInputReportEvent) {
+  debugInfo("[fun] parseSPIFlashRead");
+
   const {data, device, reportId} = event;
 
-  let f = MemoryDumpManager.receiveData(data);
-  console.log(f);
-  if(f === true) {
-    let headAddr = data.getUint16(14, true);
+  if(MemoryDumpManager.receiveData(data) === true) {
+    let headAddr = data.getUint32(14, true);
     let length = data.getUint8(18);
   
     for(let i = 0; i<length; i++){
@@ -356,13 +357,18 @@ export function parseSPIFlashRead(event: HIDInputReportEvent) {
   }
 }
 
+/**
+ * dumpData内の一部のデータをSPI Flash Memoryページに表示する。
+ */
 export function displaySPIFlashMemoryPage() {
+  debugInfo("[fun] displaySPIFlashMemoryPage");
+
   // 0x0000
   let spi0LoaderMagic = <HTMLInputElement>document.getElementById("spi-0-magic");
   let spi0BDADDR = <HTMLInputElement>document.getElementById("spi-0-bd-addr");
 
   spi0LoaderMagic.value = arrayToHexString(dumpData.slice(0x0000,0x0011)," ");
-  spi0BDADDR.value = arrayToHexString(dumpData.slice(0x0015,0x001b)) + " (" + arrayToAddress(dumpData.slice(0x0015,0x001b).reverse()) + ")";
+  spi0BDADDR.value = arrayToHexString(dumpData.slice(0x0015,0x001b)," ") + " (" + arrayToAddress(dumpData.slice(0x0015,0x001b).reverse()) + ")";
 
   // 0x1000
   let spi1OTAMagic = <HTMLInputElement>document.getElementById("spi-1-ota-magic");
@@ -386,7 +392,7 @@ export function displaySPIFlashMemoryPage() {
   } else if (dumpData[0x2000] === 0x00) {
     spi2Used.value += " (Section 2)";
   }
-  spi2Sec1Addr.value = arrayToHexString(dumpData.slice(0x2004,0x400a)) + " (" + arrayToAddress(dumpData.slice(0x2004,0x200a)) + ")";
+  spi2Sec1Addr.value = arrayToHexString(dumpData.slice(0x2004,0x200a)," ") + " (" + arrayToAddress(dumpData.slice(0x2004,0x200a)) + ")";
   spi2Sec1LTK.value = arrayToHexString(dumpData.slice(0x200a,0x201a).reverse()," ");
   spi2Sec1Host.value = arrayToHexString(dumpData.slice(0x2024,0x2025),"");
   if (dumpData[0x2024] === 0x68) {
@@ -394,7 +400,7 @@ export function displaySPIFlashMemoryPage() {
   } else if (dumpData[0x2024] === 0x08) {
     spi2Sec1Host.value += " (PC)";
   }
-  spi2Sec2Addr.value = arrayToHexString(dumpData.slice(0x202a,0x2030)) + " (" + arrayToAddress(dumpData.slice(0x202a,0x2030)) + ")";
+  spi2Sec2Addr.value = arrayToHexString(dumpData.slice(0x202a,0x2030)," ") + " (" + arrayToAddress(dumpData.slice(0x202a,0x2030)) + ")";
   spi2Sec2LTK.value = arrayToHexString(dumpData.slice(0x2030,0x2040).reverse()," ");
   spi2Sec2Host.value = arrayToHexString(dumpData.slice(0x204a,0x204b),"");
   if (dumpData[0x204a] === 0x68) {
@@ -576,18 +582,77 @@ function convertTostickData(arr: number[]) {
   return retval;
 }
 
+/**
+ * dumpData内の全てのデータをHex dumpとして表示する。
+ */
 export function displayDumpData() {
-  console.log("display");
+  debugInfo("[fun] displayDumpData");
+
+  let radio16Element = <HTMLInputElement>document.getElementById("hexdump-16byte-radio");
+  let radio32Element = <HTMLInputElement>document.getElementById("hexdump-32byte-radio");
+  let checkboxASCIIElement = <HTMLInputElement>document.getElementById("hexdump-ascii-checkbox");
+  let checkboxOffsetElement = <HTMLInputElement>document.getElementById("hexdump-offset-checkbox");
   let codeElement = <HTMLTextAreaElement>document.getElementById("dumpViewer");
 
-  let displayText = "\nOffset: 00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f\n";
-
-  for(let i = 0; i<Math.ceil(dumpData.length/16); i++) {
-    displayText += i.toString(16).padStart(5,'0') + "0: ";
-    for(let j = 0; j<16; j++) {
-      displayText += dumpData[16*i+j].toString(16).padStart(2, '0') + " ";
+  // 1行目が数文字分ずれてしまうので改行しておく
+  let displayText = "\n";
+  
+  if(radio16Element.checked === true){
+    if(checkboxOffsetElement.checked === true){
+      displayText += "Offset: 00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f\n";
     }
-    displayText += "\n";
+
+    for(let i = 0; i<Math.ceil(dumpData.length/16); i++) {
+      if(checkboxOffsetElement.checked === true){
+        displayText += i.toString(16).padStart(5,'0') + "0: ";
+      }
+      for(let j = 0; j<16; j++) {
+        displayText += dumpData[16*i+j].toString(16).padStart(2, '0') + " ";
+      }
+
+      if(checkboxASCIIElement.checked === true){
+        displayText += "    |";
+
+        for(let j = 0; j<16; j++) {
+          if(dumpData[16*i+j]<0x80 && dumpData[16*i+j]>0x20){
+            displayText += String.fromCharCode(dumpData[16*i+j]);
+          } else {
+            displayText += ".";
+          }
+        }
+        displayText += "|";
+      }
+      displayText += "\n";
+    }
+  } else if(radio32Element.checked === true) {
+    if(checkboxOffsetElement.checked === true){
+      displayText += "Offset: 00   02   04   06   08   0a   0c   0e   00   02   04   06   08   0a   0c   0e\n";
+    }
+
+    for(let i = 0; i<Math.ceil(dumpData.length/32); i++) {
+      if(checkboxOffsetElement.checked === true){
+        displayText += (i*2).toString(16).padStart(5,'0') + "0: ";
+      }
+      for(let j = 0; j<16; j++) {
+        displayText += dumpData[16*i+j].toString(16).padStart(2, '0') + dumpData[16*i+j+1].toString(16).padStart(2, '0') + " ";
+      }
+
+      if(checkboxASCIIElement.checked === true){
+        displayText += "    |";
+
+        for(let j = 0; j<32; j++) {
+          if(dumpData[32*i+j]<0x80 && dumpData[32*i+j]>0x20){
+            displayText += String.fromCharCode(dumpData[32*i+j]);
+          } else {
+            displayText += ".";
+          }
+        }
+        displayText += "|";
+      }
+      displayText += "\n";
+    }
+  } else {
+    debugInfo("Each radio buttons is not pushed");
   }
   codeElement.innerText = displayText;
 }

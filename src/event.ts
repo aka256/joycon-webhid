@@ -3,6 +3,7 @@ import { NintendoVendorId, DefaultRumble, JoyConRProductId, ProConProductId } fr
 import { toHex, PacketManager, displayModal, encodeHighFreq, encodeHighAmpli,encodeLowFreq, encodeLowAmpli, arrayToHexString, MemoryDumpManager, dataViewToArray } from './helper';
 import { parseSimpleHIDInput, parseReplyDeviceInfo, parseStandardInput, parseMCUStateReport, parseNFCState, parseSPIFlashRead, displayDumpData, displaySPIFlashMemoryPage } from './input_report';
 import { debugInfo } from './debug';
+import { read } from 'node:fs';
 
 let connectedDevice: HIDDevice;
 
@@ -433,6 +434,7 @@ export async function getPartialSPIData() {
 
   const ReadDataSet = [[0x0000,0x001b],[0x1ff4,0x2000],[0x2000,0x204b],[0x6000,0x60aa],[0x8010,0x8040]];
   const DataMaxLength = 0x1d;
+  let countLimit = 100;
 
   // MemoryDumpManagerを他が使用していなければ、通信を開始
   if (MemoryDumpManager.isSending() === false){
@@ -447,12 +449,19 @@ export async function getPartialSPIData() {
         // MemoryDumpManagerに通信内容を通知
         MemoryDumpManager.requestData(head,len);
         
-        writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x10, head%0x100, Math.floor(head/0x100), 0x00, 0x00, len);
+        writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x10, head & 0xff, (head & 0xff00) >> 8, (head & 0xff0000) >> 16, 0x00, len);
         
+        let count = 0;
         // Replyが返ってくるまで待機
         while (MemoryDumpManager.isEmptyRequestedQueue() === false) {
           //10ms待機
           await new Promise(resolve => setTimeout(resolve, 10));
+          count++;
+          if(count>countLimit){
+            // Time out
+            console.error("No reply from Joy-Con");
+            return;
+          }
         }
       }
     }
@@ -474,11 +483,78 @@ export async function hexDumpFlashMemory() {
     return;
   }
 
+  let headAddrElement = <HTMLInputElement>document.getElementById("hexdump-head-addr");
+  let lengthElement = <HTMLInputElement>document.getElementById("hexdump-length");
+  let headAddrCheckbox = <HTMLInputElement>document.getElementById("hexdump-head-addr-use-hex-checkbox");
+  let lengthCheckbox = <HTMLInputElement>document.getElementById("hexdump-length-use-hex-checkbox");
+  let readStartAddress = 0, readLength = 0;
+  if (headAddrCheckbox.checked === true) {
+    for(let i = headAddrElement.value.length - 1; i>=0; i--) {
+      if(headAddrElement.value.charCodeAt(i)>=0x30 && headAddrElement.value.charCodeAt(i)<=0x39) {
+        readStartAddress += (headAddrElement.value.charCodeAt(i) - 0x30) * (1 << 4*(headAddrElement.value.length - i - 1));
+      } else if (headAddrElement.value.charCodeAt(i)>=0x41 && headAddrElement.value.charCodeAt(i)<=0x46) {
+        readStartAddress += (headAddrElement.value.charCodeAt(i) - 0x37) * (1 << 4*(headAddrElement.value.length - i - 1));
+      } else if (headAddrElement.value.charCodeAt(i)>=0x61 && headAddrElement.value.charCodeAt(i)<=0x66) {
+        readStartAddress += (headAddrElement.value.charCodeAt(i) - 0x57) * (1 << 4*(headAddrElement.value.length - i - 1));
+      } else {
+        displayModal("not-hex-modal");
+        return;
+      }
+    }
+  } else {
+    for(let i = headAddrElement.value.length - 1; i>=0; i--) {
+      if(headAddrElement.value.charCodeAt(i)>=0x30 && headAddrElement.value.charCodeAt(i)<=0x39) {
+        readStartAddress += (headAddrElement.value.charCodeAt(i) - 0x30) * Math.pow(10,(headAddrElement.value.length - i - 1));
+      } else {
+        displayModal("not-number-modal");
+        return;
+      }
+    }
+  }
+  if (lengthCheckbox.checked === true) {
+    for(let i = lengthElement.value.length - 1; i>=0; i--) {
+      if(lengthElement.value.charCodeAt(i)>=0x30 && lengthElement.value.charCodeAt(i)<=0x39) {
+        readLength += (lengthElement.value.charCodeAt(i) - 0x30) * (1 << 4*(lengthElement.value.length - i - 1));
+      } else if (lengthElement.value.charCodeAt(i)>=0x41 && lengthElement.value.charCodeAt(i)<=0x46) {
+        readLength += (lengthElement.value.charCodeAt(i) - 0x37) * (1 << 4*(lengthElement.value.length - i - 1));
+      } else if (lengthElement.value.charCodeAt(i)>=0x61 && lengthElement.value.charCodeAt(i)<=0x66) {
+        readLength += (lengthElement.value.charCodeAt(i) - 0x57) * (1 << 4*(lengthElement.value.length - i - 1));
+      } else {
+        displayModal("not-hex-modal");
+        return;
+      }
+    }
+  } else {
+    for(let i = lengthElement.value.length - 1; i>=0; i--) {
+      if(lengthElement.value.charCodeAt(i)>=0x30 && lengthElement.value.charCodeAt(i)<=0x39) {
+        readLength += (lengthElement.value.charCodeAt(i) - 0x30) * Math.pow(10,(lengthElement.value.length - i - 1));
+      } else {
+        displayModal("not-number-modal");
+        return;
+      }
+    }
+  }
+  console.log(readStartAddress,readLength);
+
+  if(readStartAddress<0 || readStartAddress>0x80000) {
+    displayModal("hexdump-over-head-addr-modal");
+    return;
+  }
+  if(readLength<0 || readLength>0x4000) {
+    displayModal("hexdump-over-length-modal");
+    return;
+  }
+
+  // spinerの表示
+  let spinnerElement = <HTMLElement>document.getElementById("hexdump-send-btn-spinner");
+  spinnerElement.style.visibility = "visible";
+
   const DataMaxLength = 0x1d;
-  const ReadLengthLimit = 0x5000;
-  const UpperAddressLimit = 0x170000;
-  let readStartAddress = 0x6000;
-  let readLength = 0x1000;
+  const ReadLengthLimit = 0x4000;
+  const UpperAddressLimit = 0x80000;
+  //let readStartAddress = 0x6000;
+  //let readLength = 0x1000;
+  let countLimit = 100;
   
   // MemoryDumpManagerを他が使用していなければ、通信を開始
   if (MemoryDumpManager.isSending() === false){
@@ -490,12 +566,22 @@ export async function hexDumpFlashMemory() {
       // MemoryDumpManagerに通信内容を通知
       MemoryDumpManager.requestData(i, Math.min(DataMaxLength, UpperAddressLimit-(DataMaxLength+i), readStartAddress+readLength-i));
       
-      writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x10, i%0x100, Math.floor(i/0x100), 0x00, 0x00, Math.min(DataMaxLength, UpperAddressLimit-(DataMaxLength+i), readStartAddress+readLength-i));
+      writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x10, i & 0xff, (i & 0xff00) >> 8, (i & 0xff0000) >> 16, 0x00, Math.min(DataMaxLength, UpperAddressLimit-(DataMaxLength+i), readStartAddress+readLength-i));
+      console.log(i&0xff,(i & 0xff00) >> 8, (i & 0xff0000) >> 16);
       
+      let count = 0;
       // Replyが返ってくるまで待機
       while (MemoryDumpManager.isEmptyRequestedQueue() === false) {
         //10ms待機
         await new Promise(resolve => setTimeout(resolve, 10));
+        count++;
+        if(count>countLimit){
+          // Time out
+          console.error("No reply from Joy-Con");
+          // spinerの非表示
+          spinnerElement.style.visibility = "hidden";
+          return;
+        }
       }
     }
     // MemoryDumpManagerを使用済に変更
@@ -504,6 +590,8 @@ export async function hexDumpFlashMemory() {
     // dump内容を表示
     displayDumpData();
   }
+  // spinerの非表示
+  spinnerElement.style.visibility = "hidden";
 }
 
 export async function requestFlashMemory(headAddr: number, length: number) {
