@@ -23,6 +23,13 @@ async function initJoyCon() {
   // 100ms待機
   await new Promise(resolve => setTimeout(resolve, 100))
 
+  // Homeボタンを3回点滅させる
+  writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x38, 0x1f, 0xf3);
+
+  // 100ms待機
+  await new Promise(resolve => setTimeout(resolve, 100))
+
+  // Rumbleを起動
   writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x48, 0x01);
 
   // Send rumble
