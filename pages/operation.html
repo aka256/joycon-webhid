@@ -71,7 +71,23 @@
   <div class="container-xl bg-white p-3">
     <h1 class="border bg-light p-3">Joy-Con Operation Tester</h1>
 
-    <button type="button" class="btn btn-primary my-3" data-toggle="tooltip" data-placement="left" title="Connect to Joy-Con or Pro Controller" id="hid-connect-btn">Connect</button>
+    <h2>使い方</h2>
+    <ol>
+      <li>Joy-ConもしくはPro ControllerをPCに接続する。</li>
+      <p class="font-weight-bold">Windows10の場合
+      <ol>
+        <li>スタートから設定を開く。</li>
+        <li>設定内のデバイス>Bluetoothとその他のデバイスを開く。</li>
+        <li>一番上にある「Bluetoothまたはその他のデバイスを追加する」を押し、Bluetoothを選択する。</li>
+        <li>Joy-Conの側面にあるシンクロボタンを長押しし、プレイヤーランプを点滅状態にする。</li>
+        <li>PCにJoy-Con(X)もしくはPro Controllerと表示されるのでそれを選択し、接続させる。</li>
+        <li>もしも5.でJoy-Conを選択したにもかかわらず接続が完了されない場合は、Bluetoothのトラブルシューティング(設定>更新とセキュリティ>トラブルシューティング>追加のトラブルシューティングツール>Bluetooth)を行うかPCを再起動させると解決する場合がある。</li>
+      </ol>
+      </p>
+      <li>以下にあるConnectボタンを選択し、表示されたポップアップの中からWireless Gamepadを選択する。ここで選択できるコントローラがない場合は、PCとコントローラとのペアリングが出来ていないことになる。</li>
+    </ol>
+
+    <button type="button" class="btn btn-primary my-3 btn-block" data-toggle="tooltip" data-placement="left" title="Connect to Joy-Con or Pro Controller" id="hid-connect-btn">Connect to Joy-Con</button>
 
     <ul class="nav nav-tabs">
       <li class="nav-item">
@@ -91,10 +107,18 @@
       </li>
     </ul>
     <div class="tab-content">
-      <div class="tab-pane fade show active" id="home-page" role="tabpanel" aria-labelledby="home-tab">
-
+      <!--Home-->
+      <div class="tab-pane fade show active p-3" id="home-page" role="tabpanel" aria-labelledby="home-tab">
+        <h2>Home</h2>
+        <p>
+          Joy-Conの基本的な機能(ボタン操作、加速度センサー、ジャイロスコープ、プレイヤーランプの操作、HD振動等)を行う。
+        </p>
         <div class="shadow my-5 px-4 py-1 rounded-lg" id="device-info">
-          <h2 class="my-3">Device Information</h2>
+          <h3 class="my-3">Device Information</h3>
+          <h4>使い方</h4>
+          <ol>
+            <li>Getを押すだけ。</li>
+          </ol>
           <div class="form-group row">
             <lable for="firmware-ver" class="col-sm-3 col-form-label">Firmware Version</lable>
             <div class="col-sm-9">
@@ -108,7 +132,7 @@
             </div>
           </div>
           <div class="form-group row">
-            <lable for="mac-address" class="col-sm-3 col-form-label">MAC Address</lable>
+            <lable for="mac-address" class="col-sm-3 col-form-label">Bluetooth device address</lable>
             <div class="col-sm-9">
               <input class="form-control" type="text" placeholder="" readonly id="mac-address">
             </div>
@@ -128,7 +152,7 @@
 
         <div class="shadow my-5 px-4 py-3 rounded-lg">
           <div class="d-flex justify-content-between">
-            <h2>Input report</h2>
+            <h3>Input report</h3>
             <div class="btn-group btn-group-toggle my-2" data-toggle="buttons">
               <label class="btn btn-info active">
                 <input type="radio" name="input-mode" id="input-mode-simple" autocomplete="off" checked> Simple HID mode
@@ -138,6 +162,11 @@
               </label>
             </div>
           </div>
+          <h4>使い方</h4>
+            <ol>
+              <li>Simple HID modeもしくはStandard input modeのどちらを選択する。(デフォルトではSimple HID modeが選択されている。)</li>
+              <li>6-Axis sensor(加速度センサーとジャイロスコープ)を使用したい場合は、Standard input modeに変更し、Enable IMUを選択する。</li>
+            </ol>
           <!--Timer-->
           <div class="form-group row">
             <lable for="timer" class="col-sm-3 col-form-label">Timer</lable>
@@ -299,7 +328,12 @@
         </div>
         
         <div class="shadow my-5 px-4 py-3 rounded-lg">
-          <h2>Player Lights</h2>
+          <h3>Player Lights</h3>
+          <h4>使い方</h4>
+          <ol>
+            <li>Enableを押すとその部分のランプが光る。</li>
+            <li>なお、Light onとFlashではLight onが優先される。(Joy-Conの仕様)</li>
+          </ol>
           <div class="row py-1">
             <div class="offset-4 col-2 text-center">1</div>
             <div class="col-2 text-center">2</div>
@@ -356,20 +390,27 @@
 
         <div class="shadow my-5 px-4 py-3 rounded-lg">
           <div class="d-flex justify-content-between">
-            <h2>HD Rumble</h2>
+            <h3>HD Rumble</h3>
             <button type="button" class="btn btn-info my-2" data-toggle="button" aria-pressed="false" autocomplete="off" id="enable-rumble-btn">
               Enable Rumble
             </button>
           </div>
-  
+
+          <h4>使い方</h4>
+          <ol>
+            <li>Enable Rumbleを選択する。</li>
+            <li>Frequency(周波数)とAmplitude(振幅)を入力し、Setボタンを押す。</li>
+            <li>なお、FrequencyはHigh bandで82 Hz以上1253以下、Low bandで41 Hz以上626Hz以下、Amplitudeは0以上1以下となっている。</li>
+          </ol>
+
           <div class="row">
             <div class="col-4 offset-3 text-center">Left</div>
             <div class="col-4 offset-1 text-center">Right</div>
           </div>
           <div class="row">
-            <div class="col-2 offset-3 text-center">Frequency</div>
+            <div class="col-2 offset-3 text-center">Frequency [Hz]</div>
             <div class="col-2 text-center">Amplitude</div>
-            <div class="col-2 offset-1 text-center">Frequency</div>
+            <div class="col-2 offset-1 text-center">Frequency [Hz]</div>
             <div class="col-2 text-center">Amplitude</div>
           </div>
           <div class="form-group row">
@@ -410,10 +451,22 @@
         </div>
       </div>
 
-      <div class="tab-pane fade show" id="nfc-ir-page" role="tabpanel" aria-labelledby="nfc-ir-tab">
-
+      <!--NFC/IR-->
+      <div class="tab-pane fade show p-3" id="nfc-ir-page" role="tabpanel" aria-labelledby="nfc-ir-tab">
+        <h2>NFC/IR</h2>
+        <p>
+          Joy-Con内のNFCリーダーとIRカメラは、MCU(STM32F411)を介して操作される。
+        </p>
+        <h3>使い方</h3>
+        <ol>
+          <li>Setting for NFC/IR内のToggle input modeをNFC/IR modeに変更し、MCUからパケットを送信されるようにする。</li>
+          <li>Setting for NFC/IR内のResumeをNFC/IR modeに変更し、MCUを起動する。</li>
+          <li>Request MCU state内のNFC modeボタン、もしくはIR modeボタンのどちらか目的とするボタンを押す。</li>
+          <li>Request MCU state内のGetボタンを押して、MCU Stateが3. で押したモードに変更されているか確認する。変更されてなければ3.からやり直す。</li>
+          <li>これでNFCもしくはIRの機能が使用可能となる。</li>
+        </ol>
         <div class="shadow my-5 px-4 py-3 rounded-lg">
-          <h2>Setting for NFC/IR</h2>
+          <h3>Setting for NFC/IR</h3>
           <form>
             <div class="form-group row">
               <label for="" class="col-sm-3 col-form-label">Toggle input mode</label>
@@ -441,7 +494,7 @@
         </div>
 
         <div class="shadow my-5 px-4 py-3 rounded-lg" id="device-info">
-          <h2 class="my-1">Request MCU state</h2>
+          <h3 class="my-1">Request MCU state</h3>
           <div class="form-group row">
             <lable for="mcu-firmware-ver" class="col-sm-3 col-form-label">MCU Firmware version</lable>
             <div class="col-sm-9">
@@ -467,8 +520,17 @@
           </div>
         </div>
 
+        <h3>NFC mode</h3>
+        <p>
+          今のところ、NFCタグとのPollingとその時に取得されるデータの表示のみを実装している。なお、使えるNFCタグの種類は問わないので、AmiiboやSuica、マイナンバーカード等様々なカードが読み込める(はず)。
+        </p>
+        <h4>使い方</h4>
+        <ol>
+          <li>上にあるフォームを用いて、NFCモードに切り替える。</li>
+          <li>Polling to target内のPollingボタンを押して、スピナーが回っている間(5秒ほど)にコントローラにNFCタグをかざすと、データが取得される。</li>
+        </ol>
         <div class="shadow my-5 px-4 py-3 rounded-lg">
-          <h2>&lt;NFC> Polling to target</h2>
+          <h3>&lt;NFC> Polling to target</h3>
           <div class="form-group row">
             <lable for="mcu-nfc-result" class="col-sm-3 col-form-label">NFC Result</lable>
             <div class="col-sm-9">
@@ -924,7 +986,8 @@
         </div>
       </div>
 
-      <div class="tab-pane fade show" id="setting-page" role="tabpanel" aria-labelledby="setting-tab">
+      <div class="tab-pane fade show p-3" id="setting-page" role="tabpanel" aria-labelledby="setting-tab">
+        <h2>Setting</h2>
         <div class="shadow-sm bg-light mt-5 ml-5 mr-5 p-3 rounded">
           <p class="font-weight-bold">
             Advanced settings
