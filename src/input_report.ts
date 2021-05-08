@@ -614,7 +614,7 @@ export function displayDumpData() {
         displayText += "    |";
 
         for(let j = 0; j<16; j++) {
-          if(dumpData[16*i+j]<0x80 && dumpData[16*i+j]>0x20){
+          if(dumpData[16*i+j]<0x7f && dumpData[16*i+j]>0x20){
             displayText += String.fromCharCode(dumpData[16*i+j]);
           } else {
             displayText += ".";
@@ -641,7 +641,7 @@ export function displayDumpData() {
         displayText += "    |";
 
         for(let j = 0; j<32; j++) {
-          if(dumpData[32*i+j]<0x80 && dumpData[32*i+j]>0x20){
+          if(dumpData[32*i+j]<0x7f && dumpData[32*i+j]>0x20){
             displayText += String.fromCharCode(dumpData[32*i+j]);
           } else {
             displayText += ".";

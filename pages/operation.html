@@ -7,8 +7,8 @@
 
   <meta property="og:url" content="https://aka256.github.io/joycon-webhid/pages/operation.html" />
   <meta property="og:title" content="Joy-Con Operation Tester | Joy-Con with WebHID" />
-  <meta property="og:description" content="Joy-Conの動作確認を行う。" />
-  <meta property="og:image" content="../img/favicon.png" />
+  <meta property="og:description" content="Nintendo Switchに付属するJoy-ConもしくはPro Controllerのボタン操作、HD振動、プレイヤーランプ、NFCリーダー、SPI Flash Memory等の操作をブラウザ上で行う。" />
+  <meta property="og:image" content="../img/card.png" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:site" content="@Re16d5" />
   <meta property="og:site_name" content="Joy-Con with WebHID" />
@@ -901,13 +901,13 @@
       <div class="tab-pane fade show p-3" id="dump-page" role="tabpanel" aria-labelledby="dump-tab">
         <h2>SPI Flash Memory Hex Dump</h2>
         <p>
-          SPI Flash Memory内の一部のHex dumpを取得する。
+          SPI Flash Memory内の一部のHex dumpを取得する。デフォルトでは<code>0x00000</code>から<code>0x28000</code>の間にデータが保存されている。なお、このSPI Flash Memory内の詳細については<a href="https://github.com/dekuNukem/Nintendo_Switch_Reverse_Engineering/blob/master/spi_flash_notes.md">SPI Flash Memory Information | Nintendo_Switch_Reverse_Engineering</a>を参照するとよい。
         </p>
         <h3>使い方</h3>
         <ol>
           <li>Head addressに読み込みたいデータの先頭のアドレスを、Lengthには読み込みたいデータの長さを入力する。</li>
           <li>Sendボタンを押して、数秒待つ(Lengthを0x4000とした場合、40秒ほど)とResultにSPI Flash MemoryのHex dumpが表示される。</li>
-          <li>なお、Lengthは最大0x4000(16384)まで読み込める。</li>
+          <li>なお、Lengthは最大<code>0x4000</code>(16384)まで読み込める。</li>
         </ol>
         <div class="shadow rounded-lg p-3 my-3">
           <h3>Hex dump</h3>
