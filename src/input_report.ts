@@ -634,7 +634,7 @@ export function displayDumpData() {
         displayText += (i*2).toString(16).padStart(5,'0') + "0: ";
       }
       for(let j = 0; j<16; j++) {
-        displayText += dumpData[16*i+j].toString(16).padStart(2, '0') + dumpData[16*i+j+1].toString(16).padStart(2, '0') + " ";
+        displayText += dumpData[32*i+j*2].toString(16).padStart(2, '0') + dumpData[32*i+j*2+1].toString(16).padStart(2, '0') + " ";
       }
 
       if(checkboxASCIIElement.checked === true){

@@ -122,83 +122,93 @@ export async function controlHID() {
 }
 
 export async function getDeviceInfo() {
-  try {
-    writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x02, 0x00);
-  } catch (e) {
+  debugInfo("[fun] getDeviceInfo");
+
+  if(connectedDevice === undefined || connectedDevice.opened !== true){
     displayModal("not-connected-modal");
-    console.log(e);
+    return;
   }
+
+  writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x02, 0x00);
 }
 
 export async function switchSimpleHIDInput() {
+  debugInfo("[fun] switchSimpleHIDInput");
+
+  if(connectedDevice === undefined || connectedDevice.opened !== true){
+    displayModal("not-connected-modal");
+    return;
+  }
+
   let element = <HTMLInputElement>document.querySelector("#input-mode-simple");
-  if(element?.checked){
-    try {
-      writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x03, 0x3f);
-    } catch (e) {
-      displayModal("not-connected-modal");
-      console.log(e);
-    }
+
+  if(element.checked === true){
+    writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x03, 0x3f);
   }
 }
 
 export async function switchStandardInput() {
+  debugInfo("[fun] switchStandardInput");
+
+  if(connectedDevice === undefined || connectedDevice.opened !== true){
+    displayModal("not-connected-modal");
+    return;
+  }
+
   let element = <HTMLInputElement>document.querySelector("#input-mode-standard");
-  if(element.checked){
-    try {
-      writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x03, 0x30);
-    } catch (e) {
-      displayModal("not-connected-modal");
-      console.log(e);
-    }
+
+  if(element.checked === true){
+    writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x03, 0x30);
   }
 }
 
 export async function switchIMU() {
+  debugInfo("[fun] switchIMU");
+
+  if(connectedDevice === undefined || connectedDevice.opened !== true){
+    displayModal("not-connected-modal");
+    return;
+  }
+
   let element = <HTMLInputElement>document.querySelector("#enable-imu-btn");
 
   //aria-pressedの反映まで10ms待機
   await new Promise(resolve => setTimeout(resolve, 10))
 
-  if (element.getAttribute("aria-pressed")==="true"){
-    try {
-      writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x40, 0x01);
-    } catch (e) {
-      displayModal("not-connected-modal");
-      console.log(e);
-    }
+  if (element.getAttribute("aria-pressed") === "true"){
+    writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x40, 0x01);
   } else {
-    try {
-      writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x40, 0x00);
-    } catch (e) {
-      displayModal("not-connected-modal");
-      console.log(e);
-    }
+    writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x40, 0x00);
   }
 }
 
 export async function switchSimpleHIDInputMCU() {
+  debugInfo("[fun] switchSimpleHIDInputMCU");
+
+  if(connectedDevice === undefined || connectedDevice.opened !== true){
+    displayModal("not-connected-modal");
+    return;
+  }
+
   let element = <HTMLInputElement>document.querySelector("#input-mode-mcu-simple-btn");
-  if(element?.checked){
-    try {
-      writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x03, 0x3f);
-    } catch (e) {
-      displayModal("not-connected-modal");
-      console.log(e);
-    }
+
+  if(element.checked === true){
+    writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x03, 0x3f);
   }
 }
 
 export async function switchMCUInput() {
+  debugInfo("[fun] switchMCUInput");
+
+  if(connectedDevice === undefined || connectedDevice.opened !== true){
+    displayModal("not-connected-modal");
+    return;
+  }
+
   if (connectedDevice.productId === JoyConRProductId || connectedDevice.productId === ProConProductId){
     let element = <HTMLInputElement>document.querySelector("#input-mode-mcu-nfc-ir-btn");
-    if(element?.checked){
-      try {
-        writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x03, 0x31);
-      } catch (e) {
-        displayModal("not-connected-modal");
-        console.log(e);
-      }
+    if(element?.checked === true){
+      writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x03, 0x31);
     }
   } else {
     displayModal("not-have-mcu-modal");
@@ -206,15 +216,17 @@ export async function switchMCUInput() {
 }
 
 export async function switchMCUSuspend() {
+  debugInfo("[fun] switchMCUSuspend");
+
+  if(connectedDevice === undefined || connectedDevice.opened !== true){
+    displayModal("not-connected-modal");
+    return;
+  }
+
   if (connectedDevice.productId === JoyConRProductId || connectedDevice.productId === ProConProductId){
     let element = <HTMLInputElement>document.querySelector("#mcu-suspend-btn");
-    if(element?.checked){
-      try {
-        writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x22, 0x00);
-      } catch (e) {
-        displayModal("not-connected-modal");
-        console.log(e);
-      }
+    if(element?.checked === true){
+      writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x22, 0x00);
     }
   } else {
     displayModal("not-have-mcu-modal");
@@ -222,15 +234,17 @@ export async function switchMCUSuspend() {
 }
 
 export async function switchMCUResume() {
+  debugInfo("[fun] switchMCUResume");
+
+  if(connectedDevice === undefined || connectedDevice.opened !== true){
+    displayModal("not-connected-modal");
+    return;
+  }
+
   if (connectedDevice.productId === JoyConRProductId || connectedDevice.productId === ProConProductId){
     let element = <HTMLInputElement>document.querySelector("#mcu-resume-btn");
-    if(element?.checked){
-      try {
-        writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x22, 0x01);
-      } catch (e) {
-        displayModal("not-connected-modal");
-        console.log(e);
-      }
+    if(element?.checked === true){
+      writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x22, 0x01);
     }
   } else {
     displayModal("not-have-mcu-modal");
@@ -238,68 +252,72 @@ export async function switchMCUResume() {
 }
 
 export async function getMCUState() {
+  debugInfo("[fun] switchMCUState");
+
+  if(connectedDevice === undefined || connectedDevice.opened !== true){
+    displayModal("not-connected-modal");
+    return;
+  }
+
   if (connectedDevice.productId === JoyConRProductId || connectedDevice.productId === ProConProductId){
-    try {
-      writeOutputReport(connectedDevice, 0x11, PacketManager.get(), DefaultRumble, 0x01);
-    } catch (e) {
-      displayModal("not-connected-modal");
-      console.log(e);
-    }
+    writeOutputReport(connectedDevice, 0x11, PacketManager.get(), DefaultRumble, 0x01);
   } else {
     displayModal("not-have-mcu-modal");
   }
 }
 
 export async function switchNFCMode() {
+  debugInfo("[fun] switchNFCMode");
+
+  if(connectedDevice === undefined || connectedDevice.opened !== true){
+    displayModal("not-connected-modal");
+    return;
+  }
+
   if (connectedDevice.productId === JoyConRProductId || connectedDevice.productId === ProConProductId){
-    try {
-      writeOutputReport0x01Crc(connectedDevice, PacketManager.get(), DefaultRumble, 0x21, 0x21, 0x00, 0x04);
-    } catch (e) {
-      displayModal("not-connected-modal");
-      console.log(e);
-    }
+    writeOutputReport0x01Crc(connectedDevice, PacketManager.get(), DefaultRumble, 0x21, 0x21, 0x00, 0x04);
   } else {
     displayModal("not-have-mcu-modal");
   }
 }
 
 export async function switchIRMode() {
+  debugInfo("[fun] switchIRMode");
+
+  if(connectedDevice === undefined || connectedDevice.opened !== true){
+    displayModal("not-connected-modal");
+    return;
+  }
+
   if (connectedDevice.productId === JoyConRProductId || connectedDevice.productId === ProConProductId){
-    try {
-      writeOutputReport0x01Crc(connectedDevice, PacketManager.get(), DefaultRumble, 0x21, 0x21, 0x00, 0x05);
-    } catch (e) {
-      displayModal("not-connected-modal");
-      console.log(e);
-    }
+    writeOutputReport0x01Crc(connectedDevice, PacketManager.get(), DefaultRumble, 0x21, 0x21, 0x00, 0x05);
   } else {
     displayModal("not-have-mcu-modal");
   }
 }
 
+// Settingに追加?
 let pollingCount = 0;
 let pollingLimit = 10;
 
 export async function pollingToTarget() {
+  debugInfo("[fun] pollingToTarget");
+
+  if(connectedDevice === undefined || connectedDevice.opened !== true){
+    displayModal("not-connected-modal");
+    return;
+  }
+
   if (connectedDevice.productId === JoyConRProductId || connectedDevice.productId === ProConProductId){
-    if(pollingCount===0){  // initializing
-      try{
-        // stop polling
-        writeOutputReport0x11Crc(connectedDevice, PacketManager.get(), DefaultRumble, 0x02, 0x02, 0x00, 0x00, 0x08, 0x00);
-      } catch (e) {
-        displayModal("not-connected-modal");
-        console.log(e);
-        return;
-      }
+    if(pollingCount === 0){  // initializing
+      // stop polling
+      writeOutputReport0x11Crc(connectedDevice, PacketManager.get(), DefaultRumble, 0x02, 0x02, 0x00, 0x00, 0x08, 0x00);
+
       let spinnerElement = <HTMLElement>document.getElementById("polling-btn-spinner");
       spinnerElement.style.visibility = "visible";
     }
     if (pollingCount<pollingLimit){
-      try {
-        writeOutputReport0x11Crc(connectedDevice, PacketManager.get(), DefaultRumble, 0x02, 0x01, 0x00, 0x00, 0x08, 0x05, 0x00, 0xff, 0xff, 0x00, 0x01);
-      } catch (e) {
-        displayModal("not-connected-modal");
-        console.log(e);
-      }
+      writeOutputReport0x11Crc(connectedDevice, PacketManager.get(), DefaultRumble, 0x02, 0x01, 0x00, 0x00, 0x08, 0x05, 0x00, 0xff, 0xff, 0x00, 0x01)
       pollingCount += 1;
 
       setTimeout(pollingToTarget, 500);
@@ -315,6 +333,13 @@ export async function pollingToTarget() {
 }
 
 export async function setPlayerLights() {
+  debugInfo("[fun] setPlayerLights");
+
+  if(connectedDevice === undefined || connectedDevice.opened !== true){
+    displayModal("not-connected-modal");
+    return;
+  }
+
   let lightOn1Btn = <HTMLInputElement>document.getElementById("player-light-on-1-btn");
   let lightOn2Btn = <HTMLInputElement>document.getElementById("player-light-on-2-btn");
   let lightOn3Btn = <HTMLInputElement>document.getElementById("player-light-on-3-btn");
@@ -353,34 +378,26 @@ export async function setPlayerLights() {
     arg += 0x80;
   }
 
-  try {
-    writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x30, arg);
-  } catch (e) {
-    displayModal("not-connected-modal");
-    console.log(e);
-  }
+  writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x30, arg);
 }
 
 export async function switchRumble() {
+  debugInfo("[fun] switchRumble");
+
+  if(connectedDevice === undefined || connectedDevice.opened !== true){
+    displayModal("not-connected-modal");
+    return;
+  }
+
   let element = <HTMLInputElement>document.querySelector("#enable-rumble-btn");
 
   //aria-pressedの反映まで10ms待機
   await new Promise(resolve => setTimeout(resolve, 10))
 
   if (element.getAttribute("aria-pressed")==="true"){
-    try {
-      writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x48, 0x01);
-    } catch (e) {
-      displayModal("not-connected-modal");
-      console.log(e);
-    }
+    writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x48, 0x01);
   } else {
-    try {
-      writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x48, 0x00);
-    } catch (e) {
-      displayModal("not-connected-modal");
-      console.log(e);
-    }
+    writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x48, 0x00);
   }
 }
 
@@ -388,6 +405,12 @@ export async function switchRumble() {
  * 入力されたバイブレーションの実行を行う。
  */
 export async function setRumble() {
+  debugInfo("[fun] setRumble");
+
+  if(connectedDevice === undefined || connectedDevice.opened !== true){
+    displayModal("not-connected-modal");
+    return;
+  }
   // 入力内容の取得
   let leftHighFreq = <HTMLInputElement>document.getElementById("rumble-left-high-freq");
   let leftHighAmpli = <HTMLInputElement>document.getElementById("rumble-left-high-ampli");
@@ -418,15 +441,12 @@ export async function setRumble() {
   rumbleData.push(encodedRightLowFreq + ((encodedRightLowAmpli >> 8) & 0xff));
   rumbleData.push(encodedRightLowAmpli & 0xff);
 
-  try {
-    writeOutputReport(connectedDevice, 0x10, PacketManager.get(), rumbleData);
-  } catch (e) {
-    displayModal("not-connected-modal");
-    console.log(e);
-  }
+  writeOutputReport(connectedDevice, 0x10, PacketManager.get(), rumbleData);
 }
 
 export async function getPartialSPIData() {
+  debugInfo("[fun] getPartialSPIData");
+
   if(connectedDevice === undefined || connectedDevice.opened !== true){
     displayModal("not-connected-modal");
     return;
@@ -478,6 +498,8 @@ export async function getPartialSPIData() {
  * @returns None
  */
 export async function hexDumpFlashMemory() {
+  debugInfo("[fun] hexDumpFlashMemory");
+
   if(connectedDevice === undefined || connectedDevice.opened !== true){
     displayModal("not-connected-modal");
     return;
@@ -534,7 +556,6 @@ export async function hexDumpFlashMemory() {
       }
     }
   }
-  console.log(readStartAddress,readLength);
 
   if(readStartAddress<0 || readStartAddress>0x80000) {
     displayModal("hexdump-over-head-addr-modal");
@@ -567,7 +588,6 @@ export async function hexDumpFlashMemory() {
       MemoryDumpManager.requestData(i, Math.min(DataMaxLength, UpperAddressLimit-(DataMaxLength+i), readStartAddress+readLength-i));
       
       writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x10, i & 0xff, (i & 0xff00) >> 8, (i & 0xff0000) >> 16, 0x00, Math.min(DataMaxLength, UpperAddressLimit-(DataMaxLength+i), readStartAddress+readLength-i));
-      console.log(i&0xff,(i & 0xff00) >> 8, (i & 0xff0000) >> 16);
       
       let count = 0;
       // Replyが返ってくるまで待機
@@ -595,6 +615,8 @@ export async function hexDumpFlashMemory() {
 }
 
 export async function requestFlashMemory(headAddr: number, length: number) {
+  debugInfo("[fun] requestFlashMemory");
+
   if(connectedDevice.opened !== true){
     displayModal("not-connected-modal");
     return;
