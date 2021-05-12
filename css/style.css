@@ -16,3 +16,23 @@
 .body {
   background-color: rgba(211, 211, 211, 0.829);
 }
+
+.button-sm-circle {
+  width: 30px;
+  height: 30px;
+}
+
+.button-capture {
+  width: 25px;
+  height: 25px;
+}
+
+.button-circle {
+  width: 40px;
+  height: 40px;
+}
+
+#button-status div div .col-1 {
+  padding-right: 0px;
+  padding-left: 0px;
+}

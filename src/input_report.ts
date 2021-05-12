@@ -35,7 +35,17 @@ export function parseReplyDeviceInfo(event: HIDInputReportEvent){
 
 const SimpleHIDButtonTypeL: {[name: string]: number}[] = [{ "down": 0x01, "right": 0x02, "left": 0x04, "up": 0x08, "sl": 0x10, "sr": 0x20 }, { "minus": 0x01, "stickl": 0x04, "capture": 0x20, "l": 0x40, "zl": 0x80 }];
 const SimpleHIDButtonTypeR: {[name: string]: number}[] = [{ "a": 0x01, "x": 0x02, "b": 0x04, "y": 0x08, "sl": 0x10, "sr": 0x20 }, { "plus": 0x02, "stickr": 0x08, "home": 0x10, "r": 0x40, "zr": 0x80 }];
+const SimpleHIDButtonTypePC: {[name: string]: number}[] = [{ "b": 0x01, "a": 0x02, "y": 0x04, "x": 0x08, "l": 0x10, "r": 0x20, "zl": 0x40, "zr": 0x80 }, { "minus": 0x01, "plus": 0x02, "stickl": 0x04, "stickr": 0x08, "home": 0x10, "capture": 0x20 }];
 const StickHat: number[][] = [[0,-24], [15,-15], [24,0], [15,15], [0,24], [-15,15], [-24,0], [-15,-15], [0,0]];
+const StickHatPC: {[name: number]: string[]} = { 0x00: ["up"], 0x01: ["up", "right"], 0x02: ["right"], 0x03: ["right", "down"], 0x04: ["down"], 0x05: ["down", "left"], 0x06: ["left"], 0x07: ["left", "up"], 0x08: []};
+// Wiresharkで観測して調べた値なので、間違えの可能性あり
+// 下位一桁は無視していいかも
+const SimplePCStickHCenter = 0x7f5;
+const SimplePCStickVCenter = 0x842;
+const SimplePCStickHMin = 0x1d1;
+const SimplePCStickHMax = 0xe3a;
+const SimplePCStickVMin = 0x1fa;
+const SimplePCStickVMax = 0xecb;
 
 /**
  * SimpleHIDInputのparseを行う。
@@ -44,7 +54,7 @@ const StickHat: number[][] = [[0,-24], [15,-15], [24,0], [15,15], [0,24], [-15,1
 export function parseSimpleHIDInput(event: HIDInputReportEvent){
   const {data, device, reportId} = event;
   // ButtonState
-  if (device.productId === JoyConLProductId || device.productId === ProConProductId){
+  if (device.productId === JoyConLProductId) {
     for(let i = 0; i<2; i++){
       let buttonState = data.getUint8(i);
       Object.keys(SimpleHIDButtonTypeL[i]).forEach(key => {
@@ -56,40 +66,125 @@ export function parseSimpleHIDInput(event: HIDInputReportEvent){
         }
       });
     }
-  }
-  if (device.productId === JoyConRProductId || device.productId === ProConProductId){
+  } else if (device.productId === JoyConRProductId) {
     for(let i = 0; i<2; i++){
       let buttonState = data.getUint8(i);
       Object.keys(SimpleHIDButtonTypeR[i]).forEach(key => {
         let value = SimpleHIDButtonTypeR[i][key];
-        if (buttonState&value){
-          pushButtunAnimation("r-button-" + key);
+        if (key !== "plus"){
+          if (buttonState&value){
+            pushButtunAnimation("r-button-" + key);
+          } else {
+            releaseButtunAnimation("r-button-" + key);
+          }
         } else {
-          releaseButtunAnimation("r-button-" + key);
+          if (buttonState&value){
+            pushButtunAnimation("r-button-plus1");
+            pushButtunAnimation("r-button-plus2");
+            pushButtunAnimation("r-button-plus3");
+            pushButtunAnimation("r-button-plus4");
+            pushButtunAnimation("r-button-plus5");
+          } else {
+            releaseButtunAnimation("r-button-plus1");
+            releaseButtunAnimation("r-button-plus2");
+            releaseButtunAnimation("r-button-plus3");
+            releaseButtunAnimation("r-button-plus4");
+            releaseButtunAnimation("r-button-plus5");
+          }
+        }
+      });
+    }
+  } else if (device.productId === ProConProductId) {
+    for(let i = 0; i<2; i++){
+      let buttonState = data.getUint8(i);
+      Object.keys(SimpleHIDButtonTypePC[i]).forEach(key => {
+        let value = SimpleHIDButtonTypePC[i][key];
+        if (buttonState&value){
+          pushButtunAnimation("pc-button-" + key);
+        } else {
+          releaseButtunAnimation("pc-button-" + key);
         }
       });
     }
   }
-  // StickHat
+
+  // StickHat(jc) or direction buttons(pc)
   let stickHat = data.getUint8(2);
-  if (device.productId === JoyConLProductId || device.productId === ProConProductId){
+  if (device.productId === JoyConLProductId) {
     moveStickHat("l-stick-hat", StickHat[stickHat][0], StickHat[stickHat][1]);
-  }
-  if (device.productId === JoyConRProductId || device.productId === ProConProductId){
+  } else if (device.productId === JoyConRProductId) {
     moveStickHat("r-stick-hat", StickHat[stickHat][0], StickHat[stickHat][1]);
+  } else if (device.productId === ProConProductId) {
+    for(let buttonType of ["up", "right", "down", "left"]) {
+      if (StickHatPC[stickHat].includes(buttonType) === true) {
+        pushButtunAnimation("pc-button-" + buttonType);
+      } else {
+        releaseButtunAnimation("pc-button-" + buttonType);
+      }
+    }
+  }
+
+  // StickHat(pc)
+  if (device.productId === ProConProductId) {
+    // left stick
+    let lStickH = (data.getUint16(3,true) >> 4) - SimplePCStickHCenter;
+    let lStickV = (data.getUint16(5,true) >> 4) - SimplePCStickVCenter;
+    let lStickHNormalization, lStickVNormalization;
+    if (lStickH<0) {
+      lStickHNormalization = lStickH/(SimplePCStickHCenter - SimplePCStickHMin)*25;
+    } else {
+      lStickHNormalization = lStickH/(SimplePCStickHMax - SimplePCStickHCenter)*25;
+    }
+    if (lStickV<0) {
+      lStickVNormalization = lStickV/(SimplePCStickVCenter - SimplePCStickVMin)*25;
+    } else {
+      lStickVNormalization = lStickV/(SimplePCStickVMax - SimplePCStickVCenter)*25;
+    }
+    //console.log(lStickHNormalization,lStickVNormalization);
+    moveStickHat("pc-stickl-hat", lStickHNormalization, lStickVNormalization);
+
+    // right stick
+    let rStickH = (data.getUint16(7,true) >> 4) - SimplePCStickHCenter;
+    let rStickV = (data.getUint16(9,true) >> 4) - SimplePCStickVCenter;
+    let rStickHNormalization, rStickVNormalization;
+    if (rStickH<0) {
+      rStickHNormalization = rStickH/(SimplePCStickHCenter - SimplePCStickHMin)*25;
+    } else {
+      rStickHNormalization = rStickH/(SimplePCStickHMax - SimplePCStickHCenter)*25;
+    }
+    if (rStickV<0) {
+      rStickVNormalization = rStickV/(SimplePCStickVCenter - SimplePCStickVMin)*25;
+    } else {
+      rStickVNormalization = rStickV/(SimplePCStickVMax - SimplePCStickVCenter)*25;
+    }
+    //console.log(rStickHNormalization,rStickVNormalization);
+    moveStickHat("pc-stickr-hat", rStickHNormalization, rStickVNormalization);
   }
 }
 
 const BatteryDic: {[name: string]: number} = { "Full": 8, "Medium":6, "Low": 4, "Critical": 2, "Empty": 0, "Charging": 1 };
 const ConnectionInfoDic: {[name: string]: number} = { "Joy-Con": 0xe, "Pro Controller/Charging Grip": 0, "Switch/USB": 1 };
 // EXCLUDEING "charging-grip": 0x80
-const StandardButtonType: {[name: string]: number}[] = [{ "r-button-y": 0x01, "r-button-x": 0x02, "r-button-b": 0x04, "r-button-a": 0x08, "r-button-sr": 0x10, "r-button-sl": 0x20, "r-button-r": 0x40, "r-button-zr": 0x80 }, { "l-button-minus": 0x01, "r-button-plus": 0x02, "r-button-stickr": 0x04, "l-button-stickl": 0x08, "r-button-home": 0x10, "l-button-capture": 0x20,  }, { "l-button-down": 0x01, "l-button-up": 0x02, "l-button-right": 0x04, "l-button-left": 0x08, "l-button-sr": 0x10, "l-button-sl": 0x20, "l-button-l": 0x40, "l-button-zl": 0x80 }];
+const StandardButtonType: {[name: string]: number}[] = [{ "r-button-y": 0x01, "r-button-x": 0x02, "r-button-b": 0x04, "r-button-a": 0x08, "r-button-sr": 0x10, "r-button-sl": 0x20, "r-button-r": 0x40, "r-button-zr": 0x80 }, { "l-button-minus": 0x01, "r-button-plus": 0x02, "r-button-stickr": 0x04, "l-button-stickl": 0x08, "r-button-home": 0x10, "l-button-capture": 0x20,  }, { "l-button-right": 0x01, "l-button-left": 0x02, "l-button-up": 0x04, "l-button-down": 0x08, "l-button-sr": 0x10, "l-button-sl": 0x20, "l-button-l": 0x40, "l-button-zl": 0x80 }];
+const StandardButtonTypePC: {[name: string]: number}[] = [{ "pc-button-y": 0x01, "pc-button-x": 0x02, "pc-button-b": 0x04, "pc-button-a": 0x08, "pc-button-r": 0x40, "pc-button-zr": 0x80 }, { "pc-button-minus": 0x01, "pc-button-plus": 0x02, "pc-button-stickr": 0x04, "pc-button-stickl": 0x08, "pc-button-home": 0x10, "pc-button-capture": 0x20,  }, { "pc-button-up": 0x01, "pc-button-down": 0x02, "pc-button-left": 0x04, "pc-button-right": 0x08, "pc-button-l": 0x40, "pc-button-zl": 0x80 }];
 const XAxisCenterCalibration = 0x79f;
 const YAxisCenterCalibration = 0x8a0;
 const XAxisMinBelowCenterCalibration = 0x510;
 const YAxisMinBelowCenterCalibration = 0x479;
 const XAxisMaxBelowCenterCalibration = 0x4f7;
 const YAxisMaxBelowCenterCalibration = 0x424;
+const PCLStickXCenterCalibration = 0x7f5;
+const PCLStickYCenterCalibration = 0x7db;
+const PCLStickXMinBelowCenterCalibration = 0x61b;
+const PCLStickXMaxBelowCenterCalibration = 0x62f;
+const PCLStickYMinBelowCenterCalibration = 0x645;
+const PCLStickYMaxBelowCenterCalibration = 0x643;
+const PCRStickXCenterCalibration = 0x816;
+const PCRStickYCenterCalibration = 0x7d0;
+const PCRStickXMinBelowCenterCalibration = 0x62b;
+const PCRStickXMaxBelowCenterCalibration = 0x5f8;
+const PCRStickYMinBelowCenterCalibration = 0x651;
+const PCRStickYMaxBelowCenterCalibration = 0x668;
 
 /**
  * StandardInputのTimerからButtonStatusまでのparseを行う。
@@ -124,63 +219,126 @@ function parseStandardInputTimerToButtons(event: HIDInputReportEvent){
   });
 
   // Buttons
-  for(let i = 0; i<3; i++){
-    let buttonState = data.getUint8(i+2);
-    Object.keys(StandardButtonType[i]).forEach(key => {
-      let value = StandardButtonType[i][key];
-      if (buttonState&value){
-        pushButtunAnimation(key);
-      } else {
-        releaseButtunAnimation(key);
-      }
-    });
+  if (device.productId === JoyConLProductId || device.productId === JoyConRProductId){
+    for(let i = 0; i<3; i++){
+      let buttonState = data.getUint8(i+2);
+      Object.keys(StandardButtonType[i]).forEach(key => {
+        let value = StandardButtonType[i][key];
+        if (key !== "r-button-plus") {
+          if (buttonState&value){
+            pushButtunAnimation(key);
+          } else {
+            releaseButtunAnimation(key);
+          }
+        } else {
+          if (buttonState&value){
+            pushButtunAnimation("r-button-plus1");
+            pushButtunAnimation("r-button-plus2");
+            pushButtunAnimation("r-button-plus3");
+            pushButtunAnimation("r-button-plus4");
+            pushButtunAnimation("r-button-plus5");
+          } else {
+            releaseButtunAnimation("r-button-plus1");
+            releaseButtunAnimation("r-button-plus2");
+            releaseButtunAnimation("r-button-plus3");
+            releaseButtunAnimation("r-button-plus4");
+            releaseButtunAnimation("r-button-plus5");
+          }
+        }
+      });
+    }
+  } else if (device.productId === ProConProductId){
+    for(let i = 0; i<3; i++){
+      let buttonState = data.getUint8(i+2);
+      Object.keys(StandardButtonTypePC[i]).forEach(key => {
+        let value = StandardButtonTypePC[i][key];
+        if (buttonState&value){
+          pushButtunAnimation(key);
+        } else {
+          releaseButtunAnimation(key);
+        }
+      });
+    }
   }
 
   // Stick
   let lStickData = [data.getUint8(5), data.getUint8(6), data.getUint8(7)];
-  if (lStickData[0]!==0 && lStickData[1]!==0 && lStickData[2]!==0){
-    let lStickH = lStickData[0] | ((lStickData[1] & 0x0f) << 8) - XAxisCenterCalibration;
-    let lStickV = (lStickData[1] >> 4) | (lStickData[2] << 4) - YAxisCenterCalibration;
-    //console.log(lStickH, lStickV);
-    let lStickHNormalization;
-    let lStickVNormalization;
-    if (lStickH<0){
-      lStickHNormalization = lStickH/XAxisMinBelowCenterCalibration*25;
+  if (device.productId === JoyConLProductId || device.productId === JoyConRProductId){
+    if (lStickData[0]!==0 && lStickData[1]!==0 && lStickData[2]!==0){
+      let lStickH = lStickData[0] | ((lStickData[1] & 0x0f) << 8) - XAxisCenterCalibration;
+      let lStickV = (lStickData[1] >> 4) | (lStickData[2] << 4) - YAxisCenterCalibration;
+      //console.log(lStickH, lStickV);
+      let lStickHNormalization, lStickVNormalization;
+      if (lStickH<0){
+        lStickHNormalization = lStickH/XAxisMinBelowCenterCalibration*25;
+      } else {
+        lStickHNormalization = lStickH/XAxisMaxBelowCenterCalibration*25;
+      }
+      if (lStickV<0){
+        lStickVNormalization = lStickV/YAxisMinBelowCenterCalibration*25;
+      } else {
+        lStickVNormalization = lStickV/YAxisMaxBelowCenterCalibration*25;
+      }
+      //console.log(lStickHNormalization, lStickVNormalization);
+      moveStickHat("l-stick-hat", -lStickVNormalization, -lStickHNormalization);
     } else {
-      lStickHNormalization = lStickH/XAxisMaxBelowCenterCalibration*25;
+      moveStickHat("l-stick-hat", 0, 0);
+    }
+  } else if (device.productId === ProConProductId) {
+    let lStickH = lStickData[0] | ((lStickData[1] & 0x0f) << 8) - PCLStickXCenterCalibration;
+    let lStickV = (lStickData[1] >> 4) | (lStickData[2] << 4) - PCLStickYCenterCalibration;
+    let lStickHNormalization, lStickVNormalization;
+    if (lStickH<0){
+      lStickHNormalization = lStickH/PCLStickXMinBelowCenterCalibration*25;
+    } else {
+      lStickHNormalization = lStickH/PCLStickXMaxBelowCenterCalibration*25;
     }
     if (lStickV<0){
-      lStickVNormalization = lStickV/YAxisMinBelowCenterCalibration*25;
+      lStickVNormalization = lStickV/PCLStickYMinBelowCenterCalibration*25;
     } else {
-      lStickVNormalization = lStickV/YAxisMaxBelowCenterCalibration*25;
+      lStickVNormalization = lStickV/PCLStickYMaxBelowCenterCalibration*25;
     }
-    //console.log(lStickHNormalization, lStickVNormalization);
-    moveStickHat("l-stick-hat", -lStickVNormalization, -lStickHNormalization);
-  } else {
-    moveStickHat("l-stick-hat", 0, 0);
+    moveStickHat("pc-stickl-hat", lStickHNormalization, -lStickVNormalization);
   }
   
   let rStickData = [data.getUint8(8), data.getUint8(9), data.getUint8(10)];
-  if (rStickData[0]!==0 && rStickData[1]!==0 && rStickData[2]!==0){
-    let rStickH = rStickData[0] | ((rStickData[1] & 0x0f) << 8) - YAxisCenterCalibration;
-    let rStickV = (rStickData[1] >> 4) | (rStickData[2] << 4) - XAxisCenterCalibration;
-    //console.log(rStickH, rStickV);
-    let rStickHNormalization;
-    let rStickVNormalization;
-    if (rStickH<0){
-      rStickHNormalization = rStickH/YAxisMinBelowCenterCalibration*25;
+  if (device.productId === JoyConRProductId || device.productId === JoyConLProductId){
+    if (rStickData[0]!==0 && rStickData[1]!==0 && rStickData[2]!==0){
+      let rStickH = rStickData[0] | ((rStickData[1] & 0x0f) << 8) - YAxisCenterCalibration;
+      let rStickV = (rStickData[1] >> 4) | (rStickData[2] << 4) - XAxisCenterCalibration;
+      //console.log(rStickH, rStickV);
+      let rStickHNormalization;
+      let rStickVNormalization;
+      if (rStickH<0){
+        rStickHNormalization = rStickH/YAxisMinBelowCenterCalibration*25;
+      } else {
+        rStickHNormalization = rStickH/YAxisMaxBelowCenterCalibration*25;
+      }
+      if (rStickV<0){
+        rStickVNormalization = rStickV/XAxisMinBelowCenterCalibration*25;
+      } else {
+        rStickVNormalization = rStickV/XAxisMaxBelowCenterCalibration*25;
+      }
+      //console.log(rStickHNormalization, rStickVNormalization);
+      moveStickHat("r-stick-hat", rStickVNormalization, rStickHNormalization);
     } else {
-      rStickHNormalization = rStickH/YAxisMaxBelowCenterCalibration*25;
+      moveStickHat("r-stick-hat", 0, 0);
+    }
+  } else if (device.productId === ProConProductId) {
+    let rStickH = rStickData[0] | ((rStickData[1] & 0x0f) << 8) - PCRStickXCenterCalibration;
+    let rStickV = (rStickData[1] >> 4) | (rStickData[2] << 4) - PCRStickYCenterCalibration;
+    let rStickHNormalization, rStickVNormalization;
+    if (rStickH<0){
+      rStickHNormalization = rStickH/PCRStickXMinBelowCenterCalibration*25;
+    } else {
+      rStickHNormalization = rStickH/PCRStickXMaxBelowCenterCalibration*25;
     }
     if (rStickV<0){
-      rStickVNormalization = rStickV/XAxisMinBelowCenterCalibration*25;
+      rStickVNormalization = rStickV/PCLStickYMinBelowCenterCalibration*25;
     } else {
-      rStickVNormalization = rStickV/XAxisMaxBelowCenterCalibration*25;
+      rStickVNormalization = rStickV/PCRStickYMaxBelowCenterCalibration*25;
     }
-    //console.log(rStickHNormalization, rStickVNormalization);
-    moveStickHat("r-stick-hat", rStickVNormalization, rStickHNormalization);
-  } else {
-    moveStickHat("r-stick-hat", 0, 0);
+    moveStickHat("pc-stickr-hat", rStickHNormalization, -rStickVNormalization);
   }
 }
 

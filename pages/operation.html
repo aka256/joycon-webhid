@@ -191,57 +191,170 @@
           </div>
           <!--Buttons State-->
           <div id="button-status">
+            <!--Joy-Con R-->
             <div id="button-joycon-r" class="my-3 border px-3 pt-3">
               <h3>Joy-Con (R)</h3>
-              <div class="row m-3">
-                <div id="r-button-sl" class="border border-dark col-1 text-center offset-1 rounded-lg font-weight-light">SL</div>
-                <div id="r-button-sr" class="border border-dark col-1 text-center offset-3 rounded-lg font-weight-light">SR</div>
+              <div class="row m-1 mt-3">
+                <div id="r-button-sl" class="col-1 offset-2 border border-dark rounded-lg text-center font-weight-light">SL</div>
+                <div id="r-button-sr" class="col-1 offset-3 border border-dark rounded-lg text-center font-weight-light">SR</div>
               </div>
-              <div class="row m-3">
-                <div id="r-button-home" class="border border-dark col-1 text-center offset-0 rounded-lg font-weight-light align-self-center">Home</div>
-                <div id="r-button-y" class="border border-dark col-1 text-center offset-4 rounded-lg font-weight-light align-self-center">Y</div>
-                <div id="r-button-plus" class="border border-dark col-1 text-center offset-1 rounded-lg font-weight-light align-self-center">Plus</div>
+              <div class="row m-1 mt-3">
+                <div class="col-1 offset-6 d-flex align-items-center justify-content-center">
+                  <div id="r-button-y" class="border border-dark rounded-circle button-circle d-flex align-items-center justify-content-center"><div class="font-weight-light">Y</div></div>
+                </div>
+                <div class="col-1 offset-1 d-flex align-items-start justify-content-center">
+                  <div style="width: 30px; height: 30px;">
+                    <div style="height: 35%;" class="d-flex justify-content-center">
+                      <div style="width: 30%;" class="border border-dark border-bottom-0" id="r-button-plus1"></div>
+                    </div>
+                    <div style="height: 30%" class="d-flex justify-content-between">
+                      <div style="width: 35%;" class="border border-dark border-right-0" id="r-button-plus2"></div>
+                      <div style="width: 30%;" id="r-button-plus3"></div>
+                      <div style="width: 35%;" class="border border-dark border-left-0" id="r-button-plus4"></div>
+                    </div>
+                    <div style="height: 35%;" class="d-flex justify-content-center">
+                      <div style="width: 30%;" class="border border-dark border-top-0" id="r-button-plus5"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="row m-3">
-                <div class="col-1 align-self-center offset-2">
+              <div class="row m-1">
+                <div class="col-1 offset-1 d-flex align-items-center justify-content-end">
+                  <div id="r-button-home" class="button-sm-circle border border-dark rounded-circle text-center">🏠</div>
+                </div>
+                <div class="col-2 offset-1 d-flex align-items-center justify-content-center">
                   <div class="button-stick border border-dark rounded-circle" id="r-button-stickr">
                     <div class="button-stick-hat rounded-circle" id="r-stick-hat"></div>
                   </div>
                 </div>
-                <div id="r-button-b" class="border border-dark col-1 text-center offset-1 rounded-lg font-weight-light align-self-center">B</div>
-                <div id="r-button-x" class="border border-dark col-1 text-center offset-1 rounded-lg font-weight-light align-self-center">X</div>
-                <div id="r-button-r" class="border border-dark col-1 text-center offset-2 rounded-lg font-weight-light align-self-stretch">R</div>
-                <div id="r-button-zr" class="border border-dark col-1 text-center offset-1 rounded-lg font-weight-light align-self-stretch">ZR</div>
+                <div class="col-1 d-flex align-items-center justify-content-end">
+                  <div id="r-button-b" class="border border-dark rounded-circle button-circle d-flex align-items-center justify-content-center"><div class="font-weight-light">B</div></div>
+                </div>
+                <div class="col-1 offset-1 d-flex align-items-center justify-content-start">
+                  <div id="r-button-x" class="border border-dark rounded-circle button-circle d-flex align-items-center justify-content-center"><div class="font-weight-light">X</div></div>
+                </div>
+                <div class="col-1 offset-1 d-flex justify-content-center">
+                  <div id="r-button-r" class="border border-dark rounded-lg text-center font-weight-light" style="width: 50%; height: 100%;">R</div>
+                </div>
+                <div class="col-1 d-flex justify-content-center">
+                  <div id="r-button-zr" class="border border-dark rounded-lg text-center font-weight-light" style="width: 75%; height: 100%;">ZR</div>
+                </div>
               </div>
-              <div class="row m-3">
-                <div id="r-button-a" class="border border-dark col-1 text-center offset-5 rounded-lg font-weight-light align-self-center">A</div>
+              <div class="row m-1 mb-3">
+                <div class="col-1 offset-6 d-flex align-items-center justify-content-center">
+                  <div id="r-button-a" class="border border-dark rounded-circle button-circle d-flex align-items-center justify-content-center"><div class="font-weight-light">A</div></div>
+                </div>
               </div>
             </div>
+            <!--Joy-Con L-->
             <div id="button-joycon-l" class="my-3 border px-3 pt-3">
               <h3>Joy-Con (L)</h3>
-              <div class="row m-3">
-                <div id="l-button-sl" class="border border-dark col-1 text-center offset-5 rounded-lg font-weight-light">SL</div>
-                <div id="l-button-sr" class="border border-dark col-1 text-center offset-3 rounded-lg font-weight-light">SR</div>
+              <div class="row m-1 mt-3">
+                <div id="l-button-sl" class="col-1 offset-5 border border-dark rounded-lg text-center font-weight-light">SL</div>
+                <div id="l-button-sr" class="col-1 offset-3 border border-dark rounded-lg text-center font-weight-light">SR</div>
               </div>
-              <div class="row m-3">
-                <div id="l-button-minus" class="border border-dark col-1 text-center offset-3 rounded-lg font-weight-light align-self-center">Minus</div>
-                <div id="l-button-right" class="border border-dark col-1 text-center offset-4 rounded-lg font-weight-light align-self-center">Right</div>
-                <div id="l-button-capture" class="border border-dark col-1 text-center offset-2 rounded-lg font-weight-light align-self-center">Capture</div>
+              <div class="row m-1 mt-3">
+                <div class="col-1 offset-4 d-flex align-items-start justify-content-center">
+                  <div style="width: 30px; height: 30px;">
+                    <div class="border border-dark" style="width: 30%; height: 100%;" id="l-button-minus"></div>
+                  </div>
+                </div>
+                <div class="col-1 offset-3 d-flex align-items-center justify-content-center">
+                  <div id="l-button-up" class="border border-dark rounded-circle button-circle d-flex align-items-center justify-content-center"><div class="font-weight-light"></div></div>
+                </div>
+                <div class="col-1 offset-1 d-flex align-items-center justify-content-start">
+                  <div class="button-capture border border-dark rounded-sm" id="l-button-capture"></div>
+                </div>
               </div>
-              <div class="row m-3">
-                <div id="l-button-zl" class="border border-dark col-1 text-center offset-0 rounded-lg font-weight-light align-self-stretch">ZL</div>
-                <div id="l-button-l" class="border border-dark col-1 text-center offset-1 rounded-lg font-weight-light align-self-stretch">L</div>
-                <div class="col-1 align-self-center offset-2">
+              <div class="row m-1">
+                <div class="col-1 offset-1 d-flex justify-content-center">
+                  <div id="l-button-zl" class="border border-dark rounded-lg text-center font-weight-light" style="width: 75%; height: 100%;">ZL</div>
+                </div>
+                <div class="col-1 d-flex justify-content-center">
+                  <div id="l-button-l" class="border border-dark rounded-lg text-center font-weight-light" style="width: 50%; height: 100%;">L</div>
+                </div>
+                <div class="col-2 offset-1 d-flex align-items-center justify-content-center">
                   <div class="button-stick border border-dark rounded-circle" id="l-button-stickl">
                     <div class="button-stick-hat rounded-circle" id="l-stick-hat"></div>
                   </div>
                 </div>
-                <div id="l-button-up" class="border border-dark col-1 text-center offset-1 rounded-lg font-weight-light align-self-center">Up</div>
-                <div id="l-button-down" class="border border-dark col-1 text-center offset-1 rounded-lg font-weight-light align-self-center">Down</div>
-                
+                <div class="col-1 offset-1 d-flex align-items-center justify-content-end">
+                  <div id="l-button-left" class="border border-dark rounded-circle button-circle d-flex align-items-center justify-content-center"><div class="font-weight-light"></div></div>
+                </div>
+                <div class="col-1 offset-1 d-flex align-items-center justify-content-start">
+                  <div id="l-button-right" class="border border-dark rounded-circle button-circle d-flex align-items-center justify-content-center"><div class="font-weight-light"></div></div>
+                </div>
               </div>
-              <div class="row m-3">
-                <div id="l-button-left" class="border border-dark col-1 text-center offset-8 rounded-lg font-weight-light align-self-center">Left</div>
+              <div class="row m-1 mb-3">
+                <div class="col-1 offset-8 d-flex align-items-center justify-content-center">
+                  <div id="l-button-down" class="border border-dark rounded-circle button-circle d-flex align-items-center justify-content-center"><div class="font-weight-light"></div></div>
+                </div>
+              </div>
+            </div>
+            <!--Pro Controller-->
+            <div id="button-pc" class="my-3 border px-3 pt-3">
+              <h3>Pro Controller</h3>
+              <div class="row m-1 mt-3">
+                <div id="pc-button-zl" class="border border-dark col-1 text-center offset-2 rounded-lg font-weight-light align-items-center">ZL</div>
+                <div id="pc-button-zr" class="border border-dark col-1 text-center offset-6 rounded-lg font-weight-light align-items-center">ZR</div>
+              </div>
+              <div class="row m-1">
+                <div id="pc-button-l" class="border border-dark col-1 text-center offset-2 rounded-lg font-weight-light align-items-center">L</div>
+                <div id="pc-button-r" class="border border-dark col-1 text-center offset-6 rounded-lg font-weight-light align-items-center">R</div>
+              </div>
+              <div class="row m-1 mt-3">
+                <div class="col-1 offset-4 d-flex justify-content-center">
+                  <div id="pc-button-minus" class="border border-dark text-center rounded-circle button-sm-circle">&#x2796;</div>
+                </div>
+                <div class="col-1 offset-2 d-flex justify-content-center">
+                  <div id="pc-button-plus" class="border border-dark text-center rounded-circle button-sm-circle">➕</div>
+                </div>
+                <div class="col-1 offset-1 d-flex align-items-center justify-content-center">
+                  <div id="pc-button-x" class="border border-dark rounded-circle button-circle d-flex align-items-center justify-content-center"><div class="font-weight-light">X</div></div>
+                </div>
+              </div>
+              <div class="row m-1">
+                <div class="col-2 offset-1 d-flex align-items-center justify-content-center">
+                  <div class="button-stick border border-dark rounded-circle" id="pc-button-stickl">
+                    <div class="button-stick-hat rounded-circle" id="pc-stickl-hat"></div>
+                  </div>
+                </div>
+                <div class="col-1 offset-2 d-flex align-items-center justify-content-start">
+                  <div class="button-capture border border-dark rounded-sm" id="pc-button-capture"></div>
+                </div>
+                <div class="col-1 d-flex align-items-center justify-content-end">
+                  <div id="pc-button-home" class="button-sm-circle border border-dark rounded-circle text-center">🏠</div>
+                </div>
+                <div class="col-1 offset-1 d-flex align-items-center justify-content-end">
+                  <div id="pc-button-y" class="border border-dark rounded-circle button-circle d-flex align-items-center justify-content-center"><div class="font-weight-light">Y</div></div>
+                </div>
+                <div class="col-1 offset-1 d-flex align-items-center justify-content-start">
+                  <div id="pc-button-a" class="border border-dark rounded-circle button-circle d-flex align-items-center justify-content-center"><div class="font-weight-light">A</div></div>
+                </div>
+              </div>
+              <div class="row m-1 mb-3">
+                <div class="col-2 offset-3 d-flex align-items-center justify-content-center">
+                  <div style="width: 70px; height: 70px;">
+                    <div style="height: 35%;" class="d-flex justify-content-center">
+                      <div style="width: 30%;" class="border border-dark border-bottom-0" id="pc-button-up"></div>
+                    </div>
+                    <div style="height: 30%" class="d-flex justify-content-between">
+                      <div style="width: 35%;" class="border border-dark border-right-0" id="pc-button-left"></div>
+                      <div style="width: 35%;" class="border border-dark border-left-0" id="pc-button-right"></div>
+                    </div>
+                    <div style="height: 35%;" class="d-flex justify-content-center">
+                      <div style="width: 30%;" class="border border-dark border-top-0" id="pc-button-down"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-1 offset-2 d-flex align-items-center justify-content-center">
+                  <div class="button-stick border border-dark rounded-circle" id="pc-button-stickr">
+                    <div class="button-stick-hat rounded-circle" id="pc-stickr-hat"></div>
+                  </div>
+                </div>
+                <div class="col-1 offset-1 d-flex align-items-top justify-content-center">
+                  <div id="pc-button-b" class="border border-dark rounded-circle button-circle d-flex align-items-center justify-content-center"><div class="font-weight-light">B</div></div>
+                </div>
               </div>
             </div>
           </div>
