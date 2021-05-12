@@ -20,11 +20,13 @@ async function initJoyCon() {
   let playerLightOn1Btn = <HTMLInputElement>document.getElementById("player-light-on-1-btn");
   playerLightOn1Btn.classList.add("active");
 
-  // 100ms待機
-  await new Promise(resolve => setTimeout(resolve, 100))
+  if (connectedDevice.productId === JoyConRProductId || connectedDevice.productId === ProConProductId){
+    // 100ms待機
+    await new Promise(resolve => setTimeout(resolve, 100))
 
-  // Homeボタンを3回点滅させる
-  writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x38, 0x1f, 0xf3);
+    // Homeボタンを3回点滅させる
+    writeOutputReport(connectedDevice, 0x01, PacketManager.get(), DefaultRumble, 0x38, 0x1f, 0xf3);
+  }
 
   // 100ms待機
   await new Promise(resolve => setTimeout(resolve, 100))
