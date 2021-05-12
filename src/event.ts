@@ -296,7 +296,7 @@ export async function switchIRMode() {
     return;
   }
 
-  if (connectedDevice.productId === JoyConRProductId || connectedDevice.productId === ProConProductId){
+  if (connectedDevice.productId === JoyConRProductId){
     writeOutputReport0x01Crc(connectedDevice, PacketManager.get(), DefaultRumble, 0x21, 0x21, 0x00, 0x05);
   } else {
     displayModal("not-have-mcu-modal");
